@@ -21,3 +21,5 @@ doc/api/
 *.js.map
 
 .idea
+
+lib/firebase_options.dart

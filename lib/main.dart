@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:convention_ninja/pages/landing_page.dart';
+import 'package:convention_ninja/router.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'components/admin_scaffold.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,36 +13,61 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
+
+var _homeRoute = RouteParser.parseRoute('/');
+var _loginRoute = RouteParser.parseRoute('/login');
+var _dashboardRoute = RouteParser.parseRoute('/dashboard');
+var _dashboardOrgNewRoute = RouteParser.parseRoute('/dashboard/new');
+var _dashboardOrgRoute = RouteParser.parseRoute('/dashboard/:orgId');
+var _inventoryRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory');
+var _inventoryCatRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/categories');
+var _inventoryMfgRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/manufacturers');
+var _inventoryModelRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/models');
+var _inventoryAssetRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/assets');
+var _inventoryManifestRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/manifests');
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   late StreamSubscription<User?> _sub;
   final _navigatorKey = GlobalKey<NavigatorState>();
   late String _organization;
+  late User? _user;
 
   @override
   void initState() {
     super.initState();
-    print('myapp@initstate');
-    _sub = FirebaseAuth.instance.userChanges().listen((event) {
-      // _navigatorKey.currentState!.pushReplacementNamed(
-      //   event != null ? '/dashboard' : '/login',
-      // );
+    _sub = FirebaseAuth.instance.authStateChanges().listen((event) {
+      setState(() {
+        _user = event;
+      });
+      if(event == null || event.isAnonymous) {
+        _navigatorKey.currentState!.pushReplacementNamed('/login');
+        return;
+      }
+      String? currentPath;
+      _navigatorKey.currentState?.popUntil((route) {
+        currentPath = route.settings.name;
+        return true;
+      });
+      if(currentPath == '/login') {
+        _navigatorKey.currentState!.pushReplacementNamed('/dashboard');
+        return;
+      }
     });
     _organization = '';
   }
 
   void setOrganization(String organization) {
-    print(organization);
     setState(() {
       _organization = organization;
-      print(_organization);
     });
   }
 
@@ -65,227 +91,81 @@ class _MyAppState extends State<MyApp> {
       initialRoute:
           FirebaseAuth.instance.currentUser == null ? '/login' : '/dashboard',
       onGenerateRoute: (settings) {
-        print(settings.name);
-        switch (settings.name) {
-          case '/':
-          case '/login':
-            print('gets here');
-            return MaterialPageRoute(
+        var routeParams = <String>[];
+
+        if (_homeRoute.getMatch(
+            settings.name ?? '', settings.name ?? '', routeParams, false)) {
+          return MaterialPageRoute(
               builder: (context) {
-                print("gets here .5");
                 return AdminScaffold(
                     organizationUpdater: setOrganization,
                     organization: _organization,
-                    buildContext: context,
                     child: const Text('test child'));
               },
-              settings: const RouteSettings(name: '/login')
-            );
-          case '/orgs/new':
-            print('gets here 2');
-            return MaterialPageRoute(builder: (context) {
-              print("gets here 2.5");
-              return MyHomePage(title: settings.name ?? '');
-            }, settings: const RouteSettings(name: '/orgs/new'));
-          default:
-            return MaterialPageRoute(builder: (context) {
-              return MyHomePage(title: settings.name ?? '');
-            });
+              settings: const RouteSettings(name: '/login'));
+        } else if (_loginRoute.getMatch(
+            settings.name ?? '', settings.name ?? '', routeParams, false)) {
+          return MaterialPageRoute(
+              builder: (context) {
+                return const LandingPage();
+              },
+              settings: const RouteSettings(name: '/login'));
+        } else if (_dashboardRoute.getMatch(
+            settings.name ?? '', settings.name ?? '', routeParams, false)) {
+          return MaterialPageRoute(
+              builder: (context) {
+                return AdminScaffold(
+                    organizationUpdater: setOrganization,
+                    organization: _organization,
+                    child: const Text('test child'));
+              },
+              settings: const RouteSettings(name: '/dashboard'));
+        } else if (_dashboardOrgNewRoute.getMatch(
+            settings.name ?? '', settings.name ?? '', routeParams, false)) {
+          return MaterialPageRoute(
+              builder: (context) {
+                return SomethingElse(title: settings.name ?? '');
+              },
+              settings: const RouteSettings(name: '/dashboard/new'));
+        } else if (_dashboardOrgRoute.getMatch(
+            settings.name ?? '', settings.name ?? '', routeParams, false)) {
+          _organization = Uri.decodeFull(routeParams[0]);
+          return MaterialPageRoute(
+              builder: (context) {
+                return AdminScaffold(
+                    organizationUpdater: setOrganization,
+                    organization: _organization,
+                    child: const Text('test child'));
+              },
+              settings: RouteSettings(name: '/dashboard/${routeParams[0]}'));
+        } else {
+          return MaterialPageRoute(
+              builder: (context) {
+                return AdminScaffold(
+                    organizationUpdater: setOrganization,
+                    organization: _organization,
+                    child: Text(settings.name ?? ''));
+              },
+              settings: RouteSettings(name: settings.name));
         }
       },
     );
   }
 }
 
-const Widget _verticalSpacer = SizedBox(height: 8.0);
 
-class AdminScaffold extends StatelessWidget {
-  late final void Function(String organization) _organizationUpdater;
-  late final String _organization;
-  late final Widget _child;
-  late final BuildContext _buildContext;
-
-  AdminScaffold(
-      {Key? key,
-      required void Function(String organization) organizationUpdater,
-      required String organization,
-      required Widget child,
-      required BuildContext buildContext})
-      : super(key: key) {
-    _organizationUpdater = organizationUpdater;
-    _organization = organization;
-    _child = child;
-    _buildContext = buildContext;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          elevation: 10,
-          title: Text(_organization),
-          centerTitle: true,
-          actions: [
-            PopupMenuButton<String>(
-                icon: const FaIcon(FontAwesomeIcons.sitemap),
-                onSelected: (String item) {
-                  print(item);
-                  _organizationUpdater(item);
-                },
-                itemBuilder: (BuildContext ctx) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        value: 'Test Org',
-                        child: Text('Test'),
-                      ),
-                      PopupMenuItem<String>(
-                          value: '',
-                          child: const Text('New Organization'),
-                          onTap: () {
-                            Navigator.pushNamed(_buildContext, '/orgs/new');
-                          }),
-                    ]),
-            IconButton(
-                icon: const FaIcon(FontAwesomeIcons.arrowRightFromBracket),
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                })
-          ],
-        ),
-        body: Row(children: [
-          Semantics(
-              explicitChildNodes: true,
-              child: Material(
-                  elevation: 0.0,
-                  color: Theme.of(context).colorScheme.surface,
-                  child: Column(
-                    children: [
-                      _verticalSpacer,
-                      Expanded(
-                        child: Align(
-                            alignment: const Alignment(0, -1),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  constraints: const BoxConstraints(
-                                      minWidth: 150, maxWidth: 250),
-                                  child: ExpansionPanelList(
-                                    expandedHeaderPadding: EdgeInsets.zero,
-                                    elevation: 0,
-                                    children: [
-                                      ExpansionPanel(
-                                          headerBuilder: (BuildContext context,
-                                              bool isExpanded) {
-                                            return const ListTile(
-                                              leading: FaIcon(
-                                                FontAwesomeIcons.warehouse,
-                                                size: 15,
-                                                semanticLabel:
-                                                    'Asset Management',
-                                              ),
-                                              minLeadingWidth: 0.0,
-                                              title: Text(
-                                                'Asset Mgmt',
-                                                semanticsLabel:
-                                                    'Asset Management',
-                                              ),
-                                            );
-                                          },
-                                          body: Column(
-                                            children: [
-                                              ListTile(
-                                                  leading: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15.0),
-                                                      child: FaIcon(
-                                                          FontAwesomeIcons
-                                                              .folder,
-                                                          size: 15)),
-                                                  minLeadingWidth: 5.0,
-                                                  title:
-                                                      const Text('Categories'),
-                                                  onTap: () {}),
-                                              ListTile(
-                                                  leading: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15.0),
-                                                      child: FaIcon(
-                                                          FontAwesomeIcons
-                                                              .industry,
-                                                          size: 15)),
-                                                  minLeadingWidth: 5.0,
-                                                  title: const Text(
-                                                      'Manufacturers'),
-                                                  onTap: () {}),
-                                              ListTile(
-                                                  leading: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15.0),
-                                                      child: FaIcon(
-                                                          FontAwesomeIcons
-                                                              .boxesStacked,
-                                                          size: 15)),
-                                                  minLeadingWidth: 5.0,
-                                                  title: const Text('Models'),
-                                                  onTap: () {}),
-                                              ListTile(
-                                                  leading: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15.0),
-                                                      child: FaIcon(
-                                                          FontAwesomeIcons
-                                                              .barcode,
-                                                          size: 15)),
-                                                  minLeadingWidth: 5.0,
-                                                  title: const Text('Assets'),
-                                                  onTap: () {}),
-                                              ListTile(
-                                                  leading: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15.0),
-                                                      child: FaIcon(
-                                                          FontAwesomeIcons
-                                                              .truckFast,
-                                                          size: 15)),
-                                                  minLeadingWidth: 5.0,
-                                                  title:
-                                                      const Text('Manifests'),
-                                                  onTap: () {}),
-                                            ],
-                                          ),
-                                          isExpanded: true)
-                                    ],
-                                  ),
-                                )
-                              ],
-                            )),
-                      )
-                    ],
-                  ))),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Center(child: _child),
-              ],
-            ),
-          )
-        ]));
-  }
-}
 
 class StatefulWrapper extends StatefulWidget {
   final Function onInit;
   final Widget child;
 
-  const StatefulWrapper({required this.onInit, required this.child});
+  const StatefulWrapper({Key? key, required this.onInit, required this.child}) : super(key: key);
 
   @override
-  _StatefulWrapperState createState() => _StatefulWrapperState();
+  StatefulWrapperState createState() => StatefulWrapperState();
 }
 
-class _StatefulWrapperState extends State<StatefulWrapper> {
+class StatefulWrapperState extends State<StatefulWrapper> {
   @override
   void initState() {
     widget.onInit();
@@ -336,25 +216,40 @@ class PageWrapper extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  var title;
-
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState(title);
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class SomethingElse extends StatelessWidget {
   final String title;
 
-  _MyHomePageState(this.title);
+  const SomethingElse({Key? key, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: InkWell(
           child: Text(title),
+          onTap: () {
+            FirebaseAuth.instance.signOut();
+          }),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  final String title;
+
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  _MyHomePageState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: InkWell(
+          child: Text(widget.title),
           onTap: () {
             FirebaseAuth.instance.signOut();
           }),
