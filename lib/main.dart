@@ -22,11 +22,16 @@ var _dashboardRoute = RouteParser.parseRoute('/dashboard');
 var _dashboardOrgNewRoute = RouteParser.parseRoute('/dashboard/new');
 var _dashboardOrgRoute = RouteParser.parseRoute('/dashboard/:orgId');
 var _inventoryRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory');
-var _inventoryCatRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/categories');
-var _inventoryMfgRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/manufacturers');
-var _inventoryModelRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/models');
-var _inventoryAssetRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/assets');
-var _inventoryManifestRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory/manifests');
+var _inventoryCatRoute =
+    RouteParser.parseRoute('/dashboard/:orgId/inventory/categories');
+var _inventoryMfgRoute =
+    RouteParser.parseRoute('/dashboard/:orgId/inventory/manufacturers');
+var _inventoryModelRoute =
+    RouteParser.parseRoute('/dashboard/:orgId/inventory/models');
+var _inventoryAssetRoute =
+    RouteParser.parseRoute('/dashboard/:orgId/inventory/assets');
+var _inventoryManifestRoute =
+    RouteParser.parseRoute('/dashboard/:orgId/inventory/manifests');
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -39,15 +44,12 @@ class MyAppState extends State<MyApp> {
   late StreamSubscription<User?> _sub;
   final _navigatorKey = GlobalKey<NavigatorState>();
   late String _organization;
-  late User? _user;
+  bool _fbLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _sub = FirebaseAuth.instance.authStateChanges().listen((event) {
-      setState(() {
-        _user = event;
-      });
+    /*_sub = FirebaseAuth.instance.authStateChanges().listen((event) {
       if(event == null || event.isAnonymous) {
         _navigatorKey.currentState!.pushReplacementNamed('/login');
         return;
@@ -61,7 +63,7 @@ class MyAppState extends State<MyApp> {
         _navigatorKey.currentState!.pushReplacementNamed('/dashboard');
         return;
       }
-    });
+    });*/
     _organization = '';
   }
 
@@ -77,89 +79,107 @@ class MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  Route<dynamic> generateRoute(settings) {
+    var routeParams = <String>[];
+    var route = settings.name;
+    if(FirebaseAuth.instance.currentUser == null) {
+      route = '/login';
+    } else if(FirebaseAuth.instance.currentUser != null && settings.name == '/login') {
+      route = '/dashboard';
+    }
+    print(settings.name);
+    if (_homeRoute.getMatch(route ?? '', route ?? '',
+        routeParams, false)) {
+      return MaterialPageRoute(
+          builder: (context) {
+            return AdminScaffold(
+                organizationUpdater: setOrganization,
+                organization: _organization,
+                child: const Text('test child'));
+          },
+          settings: const RouteSettings(name: '/login'));
+    } else if (_loginRoute.getMatch(route ?? '',
+        route ?? '', routeParams, false)) {
+      return MaterialPageRoute(
+          builder: (context) {
+            return const LandingPage();
+          },
+          settings: const RouteSettings(name: '/login'));
+    } else if (_dashboardOrgNewRoute.getMatch(route ?? '',
+        route ?? '', routeParams, false)) {
+      return MaterialPageRoute(
+          builder: (context) {
+            return SomethingElse(title: route ?? '');
+          },
+          settings: const RouteSettings(name: '/dashboard/new'));
+    } else if (_dashboardOrgRoute.getMatch(route ?? '',
+        route ?? '', routeParams, false)) {
+      _organization = Uri.decodeFull(routeParams[0]);
+      return MaterialPageRoute(
+          builder: (context) {
+            return AdminScaffold(
+                organizationUpdater: setOrganization,
+                organization: _organization,
+                child: const Text('dashboardOrgRoute'));
+          },
+          settings: RouteSettings(name: '/dashboard/$_organization'));
+    } else if (_dashboardRoute.getMatch(route ?? '',
+        route ?? '', routeParams, false)) {
+      return MaterialPageRoute(
+          builder: (context) {
+            return AdminScaffold(
+                organizationUpdater: setOrganization,
+                organization: _organization,
+                child: const Text('dashboardRoute'));
+          },
+          settings: const RouteSettings(name: '/dashboard'));
+    } else {
+      return MaterialPageRoute(
+          builder: (context) {
+            return AdminScaffold(
+                organizationUpdater: setOrganization,
+                organization: _organization,
+                child: Text(route ?? ''));
+          },
+          settings: RouteSettings(name: route));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Convention.Ninja',
-      navigatorKey: _navigatorKey,
-      darkTheme: ThemeData.from(
-          colorScheme: ColorScheme.fromSwatch(
-              primarySwatch: Colors.deepOrange, brightness: Brightness.dark),
-          useMaterial3: true),
-      themeMode: ThemeMode.dark,
-      initialRoute:
-          FirebaseAuth.instance.currentUser == null ? '/login' : '/dashboard',
-      onGenerateRoute: (settings) {
-        var routeParams = <String>[];
-
-        if (_homeRoute.getMatch(
-            settings.name ?? '', settings.name ?? '', routeParams, false)) {
-          return MaterialPageRoute(
-              builder: (context) {
-                return AdminScaffold(
-                    organizationUpdater: setOrganization,
-                    organization: _organization,
-                    child: const Text('test child'));
-              },
-              settings: const RouteSettings(name: '/login'));
-        } else if (_loginRoute.getMatch(
-            settings.name ?? '', settings.name ?? '', routeParams, false)) {
-          return MaterialPageRoute(
-              builder: (context) {
-                return const LandingPage();
-              },
-              settings: const RouteSettings(name: '/login'));
-        } else if (_dashboardRoute.getMatch(
-            settings.name ?? '', settings.name ?? '', routeParams, false)) {
-          return MaterialPageRoute(
-              builder: (context) {
-                return AdminScaffold(
-                    organizationUpdater: setOrganization,
-                    organization: _organization,
-                    child: const Text('test child'));
-              },
-              settings: const RouteSettings(name: '/dashboard'));
-        } else if (_dashboardOrgNewRoute.getMatch(
-            settings.name ?? '', settings.name ?? '', routeParams, false)) {
-          return MaterialPageRoute(
-              builder: (context) {
-                return SomethingElse(title: settings.name ?? '');
-              },
-              settings: const RouteSettings(name: '/dashboard/new'));
-        } else if (_dashboardOrgRoute.getMatch(
-            settings.name ?? '', settings.name ?? '', routeParams, false)) {
-          _organization = Uri.decodeFull(routeParams[0]);
-          return MaterialPageRoute(
-              builder: (context) {
-                return AdminScaffold(
-                    organizationUpdater: setOrganization,
-                    organization: _organization,
-                    child: const Text('test child'));
-              },
-              settings: RouteSettings(name: '/dashboard/${routeParams[0]}'));
-        } else {
-          return MaterialPageRoute(
-              builder: (context) {
-                return AdminScaffold(
-                    organizationUpdater: setOrganization,
-                    organization: _organization,
-                    child: Text(settings.name ?? ''));
-              },
-              settings: RouteSettings(name: settings.name));
-        }
-      },
-    );
+    return StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (_, snapshot) {
+          if (!_fbLoaded &&
+              snapshot.connectionState == ConnectionState.waiting) {
+            return Container();
+          }
+          _fbLoaded = true;
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Convention.Ninja',
+            navigatorKey: _navigatorKey,
+            darkTheme: ThemeData.from(
+                colorScheme: ColorScheme.fromSwatch(
+                    primarySwatch: Colors.deepOrange,
+                    brightness: Brightness.dark),
+                useMaterial3: true),
+            themeMode: ThemeMode.dark,
+            onGenerateInitialRoutes: (String initialRoute) {
+              return [generateRoute(RouteSettings(name: initialRoute))];
+            },
+            onGenerateRoute: generateRoute,
+          );
+        });
   }
 }
-
-
 
 class StatefulWrapper extends StatefulWidget {
   final Function onInit;
   final Widget child;
 
-  const StatefulWrapper({Key? key, required this.onInit, required this.child}) : super(key: key);
+  const StatefulWrapper({Key? key, required this.onInit, required this.child})
+      : super(key: key);
 
   @override
   StatefulWrapperState createState() => StatefulWrapperState();

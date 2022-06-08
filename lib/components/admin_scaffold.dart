@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../services/organization_service.dart';
+
 const Widget _verticalSpacer = SizedBox(height: 8.0);
 
 class DashboardMenuEntry {
@@ -14,18 +16,31 @@ class DashboardMenuEntry {
       {required this.icon, required this.label, this.children, this.getOnTap});
 }
 
-class AdminScaffold extends StatelessWidget {
+class AdminScaffold extends StatefulWidget {
   final void Function(String organization) organizationUpdater;
   final String organization;
   final Widget child;
 
+  const AdminScaffold({
+    Key? key,
+    required this.organizationUpdater,
+    required this.organization,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  State<AdminScaffold> createState() => _AdminScaffoldState();
+}
+
+class _AdminScaffoldState extends State<AdminScaffold> {
   final List<DashboardMenuEntry> menu = [
     DashboardMenuEntry(
         icon: FontAwesomeIcons.warehouse,
         label: 'Asset Mgmt',
         getOnTap: (BuildContext context, AdminScaffold container) {
           return () {
-            Navigator.pushNamed(context, '/dashboard/${container.organization}/inventory');
+            Navigator.pushNamed(
+                context, '/dashboard/${container.organization}/inventory');
           };
         },
         children: [
@@ -39,7 +54,8 @@ class AdminScaffold extends StatelessWidget {
                 };
               }),
           DashboardMenuEntry(
-              icon: FontAwesomeIcons.industry, label: 'Manufacturers',
+              icon: FontAwesomeIcons.industry,
+              label: 'Manufacturers',
               getOnTap: (BuildContext context, AdminScaffold container) {
                 return () {
                   Navigator.pushNamed(context,
@@ -47,14 +63,17 @@ class AdminScaffold extends StatelessWidget {
                 };
               }),
           DashboardMenuEntry(
-              icon: FontAwesomeIcons.boxesStacked, label: 'Models',
+              icon: FontAwesomeIcons.boxesStacked,
+              label: 'Models',
               getOnTap: (BuildContext context, AdminScaffold container) {
                 return () {
                   Navigator.pushNamed(context,
                       '/dashboard/${container.organization}/inventory/models');
                 };
               }),
-          DashboardMenuEntry(icon: FontAwesomeIcons.barcode, label: 'Assets',
+          DashboardMenuEntry(
+              icon: FontAwesomeIcons.barcode,
+              label: 'Assets',
               getOnTap: (BuildContext context, AdminScaffold container) {
                 return () {
                   Navigator.pushNamed(context,
@@ -62,7 +81,8 @@ class AdminScaffold extends StatelessWidget {
                 };
               }),
           DashboardMenuEntry(
-              icon: FontAwesomeIcons.truckFast, label: 'Manifests',
+              icon: FontAwesomeIcons.truckFast,
+              label: 'Manifests',
               getOnTap: (BuildContext context, AdminScaffold container) {
                 return () {
                   Navigator.pushNamed(context,
@@ -71,13 +91,6 @@ class AdminScaffold extends StatelessWidget {
               }),
         ])
   ];
-
-  AdminScaffold({
-    Key? key,
-    required this.organizationUpdater,
-    required this.organization,
-    required this.child,
-  }) : super(key: key);
 
   Widget menuEntry(BuildContext context, DashboardMenuEntry entry, int depth) {
     assert(entry.children == null);
@@ -90,7 +103,8 @@ class AdminScaffold extends StatelessWidget {
           entry.label,
           semanticsLabel: entry.label,
         ),
-        onTap: entry.getOnTap != null ? entry.getOnTap!(context, this) : null);
+        onTap:
+            entry.getOnTap != null ? entry.getOnTap!(context, widget) : null);
   }
 
   ExpansionPanel menuItem(
@@ -114,13 +128,22 @@ class AdminScaffold extends StatelessWidget {
             entry.label,
             semanticsLabel: entry.label,
           ),
-          onTap: entry.getOnTap != null ? entry.getOnTap!(context, this) : null,
+          onTap:
+              entry.getOnTap != null ? entry.getOnTap!(context, widget) : null,
         );
       },
       body: Column(children: children),
       isExpanded: children.isNotEmpty,
       canTapOnHeader: entry.getOnTap != null,
     );
+  }
+
+  late Future<List<Organization>> _organizations;
+
+  @override
+  void initState() {
+    super.initState();
+    _organizations = OrganizationService.getAll();
   }
 
   List<ExpansionPanel> getMenu(
@@ -131,6 +154,16 @@ class AdminScaffold extends StatelessWidget {
     }
     return ret;
   }
+  Route<dynamic> generateRoute(settings) {
+    return MaterialPageRoute(
+      builder: (BuildContext ctx) {
+        return Scaffold(
+          body: Center(child: Text(settings.name))
+        );
+      },
+      settings: RouteSettings(name: settings.name)
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,36 +171,63 @@ class AdminScaffold extends StatelessWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           elevation: 10,
-          title: Text(organization),
+          title: FutureBuilder<List<Organization>>(
+            future: _organizations,
+            initialData: [
+              Organization(
+                  id: widget.organization,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                  name: widget.organization,
+                  ownerId: '')
+            ],
+            builder: (_, snapshot) {
+              for (var value in snapshot.requireData) {
+                if (value.id == widget.organization) {
+                  return Text(value.name);
+                }
+              }
+              return Text(widget.organization);
+            },
+          ),
           centerTitle: true,
           actions: [
-            PopupMenuButton<String>(
-                icon: const FaIcon(FontAwesomeIcons.sitemap),
-                onSelected: (String item) {
-                  if (item == '__neworg') {
-                    Navigator.pushNamed(context, '/dashboard/new');
-                  } else {
-                    if (item != organization) {
-                      organizationUpdater(item);
-                      Navigator.pushNamed(context, '/dashboard/$item');
-                    }
+            FutureBuilder<List<Organization>>(
+                future: _organizations,
+                builder: (_, snapshot) {
+                  var orgs = <Organization>[];
+                  if (snapshot.hasData) {
+                    orgs = snapshot.requireData;
                   }
-                },
-                itemBuilder: (BuildContext ctx) =>
-                const <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    value: 'Test Org',
-                    child: Text('Test'),
-                  ),
-                  PopupMenuItem<String>(
-                    value: '__neworg',
-                    child: Text('New Organization'),
-                  )
-                ]),
+                  return PopupMenuButton<String>(
+                      icon: const FaIcon(FontAwesomeIcons.sitemap),
+                      onSelected: (String item) {
+                        if (item == '__neworg') {
+                          Navigator.pushNamed(context, '/dashboard/new');
+                        } else {
+                          if (item != widget.organization) {
+                            widget.organizationUpdater(item);
+                            Navigator.pushNamed(context, '/dashboard/$item');
+                          }
+                        }
+                      },
+                      itemBuilder: (BuildContext ctx) =>
+                          <PopupMenuEntry<String>>[
+                            ...orgs.map((e) => PopupMenuItem<String>(
+                                  value: e.id,
+                                  child: Text(e.name),
+                                )),
+                            const PopupMenuItem<String>(
+                              value: '__neworg',
+                              child: Text('New Organization'),
+                            )
+                          ]);
+                }),
             IconButton(
                 icon: const FaIcon(FontAwesomeIcons.arrowRightFromBracket),
                 onPressed: () {
-                  FirebaseAuth.instance.signOut();
+                  FirebaseAuth.instance.signOut().whenComplete(
+                      () => Navigator.pushNamed(context, '/login'));
                 })
           ],
         ),
@@ -204,7 +264,15 @@ class AdminScaffold extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                Center(child: child),
+                Flexible(
+                  child: Navigator(
+                    onGenerateInitialRoutes: (NavigatorState _, String initialRoute) {
+                      return [generateRoute(RouteSettings(name: initialRoute))];
+                    },
+                    onGenerateRoute: generateRoute,
+                  ),
+                ),
+                Center(child: widget.child),
               ],
             ),
           )
