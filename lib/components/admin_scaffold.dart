@@ -1,3 +1,6 @@
+import 'package:beamer/beamer.dart';
+import 'package:convention_ninja/locations/dashboard_location.dart';
+import 'package:convention_ninja/locations/inventory_location.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,83 +13,80 @@ class DashboardMenuEntry {
   IconData icon;
   String label;
   List<DashboardMenuEntry>? children;
-  Function() Function(BuildContext, AdminScaffold)? getOnTap;
+  Function() Function(BuildContext, GlobalKey<BeamerState>, String)? getOnTap;
 
   DashboardMenuEntry(
       {required this.icon, required this.label, this.children, this.getOnTap});
 }
 
 class AdminScaffold extends StatefulWidget {
-  final void Function(String organization) organizationUpdater;
-  final String organization;
-  final Widget child;
+  AdminScaffold({Key? key, required this.organizationId}) : super(key: key);
 
-  const AdminScaffold({
-    Key? key,
-    required this.organizationUpdater,
-    required this.organization,
-    required this.child,
-  }) : super(key: key);
+  final String organizationId;
 
+  organizationUpdater(String org) {}
+  final Widget child = const Text("omg child");
+  final GlobalKey<BeamerState> beamKey = GlobalKey<BeamerState>();
   @override
   State<AdminScaffold> createState() => _AdminScaffoldState();
 }
 
 class _AdminScaffoldState extends State<AdminScaffold> {
-  final List<DashboardMenuEntry> menu = [
+  List<DashboardMenuEntry> menu = [];
+
+  void _setStateListener() {
+    print("asdfasdf");
+    setState(() {});
+  }
+
+  List<DashboardMenuEntry> createMenu() => [
     DashboardMenuEntry(
         icon: FontAwesomeIcons.warehouse,
         label: 'Asset Mgmt',
-        getOnTap: (BuildContext context, AdminScaffold container) {
+        getOnTap: (BuildContext context, GlobalKey<BeamerState> beamKey, String organizationId) {
           return () {
-            Navigator.pushNamed(
-                context, '/dashboard/${container.organization}/inventory');
+            beamKey.currentState?.routerDelegate.beamToNamed('/dashboard/$organizationId/inventory');
           };
         },
         children: [
           DashboardMenuEntry(
               icon: FontAwesomeIcons.folder,
               label: 'Categories',
-              getOnTap: (BuildContext context, AdminScaffold container) {
+              getOnTap: (BuildContext context, GlobalKey<BeamerState> beamKey, String organizationId) {
                 return () {
-                  Navigator.pushNamed(context,
-                      '/dashboard/${container.organization}/inventory/categories');
+                  beamKey.currentContext?.beamToNamed('/dashboard/$organizationId/inventory/categories');
                 };
               }),
           DashboardMenuEntry(
               icon: FontAwesomeIcons.industry,
               label: 'Manufacturers',
-              getOnTap: (BuildContext context, AdminScaffold container) {
+              getOnTap: (BuildContext context, GlobalKey<BeamerState> beamKey, String organizationId) {
                 return () {
-                  Navigator.pushNamed(context,
-                      '/dashboard/${container.organization}/inventory/manufacturers');
+                  beamKey.currentState?.routerDelegate.beamToNamed('/dashboard/$organizationId/inventory/manufacturers');
                 };
               }),
           DashboardMenuEntry(
               icon: FontAwesomeIcons.boxesStacked,
               label: 'Models',
-              getOnTap: (BuildContext context, AdminScaffold container) {
+              getOnTap: (BuildContext context, GlobalKey<BeamerState> beamKey, String organizationId) {
                 return () {
-                  Navigator.pushNamed(context,
-                      '/dashboard/${container.organization}/inventory/models');
+                  beamKey.currentState?.routerDelegate.beamToNamed('/dashboard/$organizationId/inventory/models');
                 };
               }),
           DashboardMenuEntry(
               icon: FontAwesomeIcons.barcode,
               label: 'Assets',
-              getOnTap: (BuildContext context, AdminScaffold container) {
+              getOnTap: (BuildContext context, GlobalKey<BeamerState> beamKey, String organizationId) {
                 return () {
-                  Navigator.pushNamed(context,
-                      '/dashboard/${container.organization}/inventory/assets');
+                  beamKey.currentState?.routerDelegate.beamToNamed('/dashboard/$organizationId/inventory/assets');
                 };
               }),
           DashboardMenuEntry(
               icon: FontAwesomeIcons.truckFast,
               label: 'Manifests',
-              getOnTap: (BuildContext context, AdminScaffold container) {
+              getOnTap: (BuildContext context, GlobalKey<BeamerState> beamKey, String organizationId) {
                 return () {
-                  Navigator.pushNamed(context,
-                      '/dashboard/${container.organization}/inventory/manifests');
+                  beamKey.currentState?.routerDelegate.beamToNamed('/dashboard/$organizationId/inventory/manifests');
                 };
               }),
         ])
@@ -104,7 +104,7 @@ class _AdminScaffoldState extends State<AdminScaffold> {
           semanticsLabel: entry.label,
         ),
         onTap:
-            entry.getOnTap != null ? entry.getOnTap!(context, widget) : null);
+            entry.getOnTap != null ? entry.getOnTap!(context, widget.beamKey, widget.organizationId) : null);
   }
 
   ExpansionPanel menuItem(
@@ -129,7 +129,7 @@ class _AdminScaffoldState extends State<AdminScaffold> {
             semanticsLabel: entry.label,
           ),
           onTap:
-              entry.getOnTap != null ? entry.getOnTap!(context, widget) : null,
+              entry.getOnTap != null ? entry.getOnTap!(context, widget.beamKey, widget.organizationId) : null,
         );
       },
       body: Column(children: children),
@@ -144,25 +144,30 @@ class _AdminScaffoldState extends State<AdminScaffold> {
   void initState() {
     super.initState();
     _organizations = OrganizationService.getAll();
+    menu = createMenu();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      widget.beamKey.currentState?.routerDelegate
+          .addListener(_setStateListener);
+    });
+  }
+  @override
+  void dispose() {
+    widget.beamKey.currentState?.routerDelegate
+        .removeListener(_setStateListener);
+    super.dispose();
   }
 
   List<ExpansionPanel> getMenu(
       BuildContext context, List<DashboardMenuEntry> entries) {
     var ret = <ExpansionPanel>[];
+    if(widget.organizationId == "" || widget.organizationId == "new") {
+      return ret;
+    }
     for (var entry in entries) {
       ret.add(menuItem(context, entry, 0));
     }
     return ret;
-  }
-  Route<dynamic> generateRoute(settings) {
-    return MaterialPageRoute(
-      builder: (BuildContext ctx) {
-        return Scaffold(
-          body: Center(child: Text(settings.name))
-        );
-      },
-      settings: RouteSettings(name: settings.name)
-    );
   }
 
   @override
@@ -175,19 +180,22 @@ class _AdminScaffoldState extends State<AdminScaffold> {
             future: _organizations,
             initialData: [
               Organization(
-                  id: widget.organization,
+                  id: widget.organizationId,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
-                  name: widget.organization,
+                  name: widget.organizationId,
                   ownerId: '')
             ],
             builder: (_, snapshot) {
               for (var value in snapshot.requireData) {
-                if (value.id == widget.organization) {
+                if (value.id == widget.organizationId) {
                   return Text(value.name);
                 }
               }
-              return Text(widget.organization);
+              if(widget.organizationId == "new") {
+                return const Text("New Organization");
+              }
+              return Text(widget.organizationId);
             },
           ),
           centerTitle: true,
@@ -203,11 +211,10 @@ class _AdminScaffoldState extends State<AdminScaffold> {
                       icon: const FaIcon(FontAwesomeIcons.sitemap),
                       onSelected: (String item) {
                         if (item == '__neworg') {
-                          Navigator.pushNamed(context, '/dashboard/new');
+                          Future.delayed(const Duration(milliseconds: 500)).then((value) => Beamer.of(context).beamToNamed('/dashboard/new'));
                         } else {
-                          if (item != widget.organization) {
-                            widget.organizationUpdater(item);
-                            Navigator.pushNamed(context, '/dashboard/$item');
+                          if (item != widget.organizationId) {
+                            Future.delayed(const Duration(milliseconds: 500)).then((value) => Beamer.of(context).beamToNamed('/dashboard/$item'));
                           }
                         }
                       },
@@ -227,7 +234,7 @@ class _AdminScaffoldState extends State<AdminScaffold> {
                 icon: const FaIcon(FontAwesomeIcons.arrowRightFromBracket),
                 onPressed: () {
                   FirebaseAuth.instance.signOut().whenComplete(
-                      () => Navigator.pushNamed(context, '/login'));
+                      () {context.beamToNamed('/login');});
                 })
           ],
         ),
@@ -265,14 +272,24 @@ class _AdminScaffoldState extends State<AdminScaffold> {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Flexible(
-                  child: Navigator(
-                    onGenerateInitialRoutes: (NavigatorState _, String initialRoute) {
-                      return [generateRoute(RouteSettings(name: initialRoute))];
-                    },
-                    onGenerateRoute: generateRoute,
+                  child: Beamer(
+                    key: widget.beamKey,
+                    routerDelegate: BeamerDelegate(
+                      transitionDelegate: const NoAnimationTransitionDelegate(),
+                      locationBuilder: (routeInformation, _) {
+                        if(routeInformation.location!.contains("/inventory")) {
+                          return InventoryLocation(routeInformation);
+                        } else if(routeInformation.location!.contains("/dashboard/new")) {
+                          return DashboardLocation(routeInformation);
+                        } else if(routeInformation.location == "/dashboard") {
+                          return DashboardLocation(routeInformation);
+                        } else {
+                          return InventoryLocation(routeInformation);
+                        }
+                      },
+                    ),
                   ),
                 ),
-                Center(child: widget.child),
               ],
             ),
           )

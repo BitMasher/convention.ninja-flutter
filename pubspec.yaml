@@ -38,6 +38,7 @@ dependencies:
   firebase_core: ^1.16.0
   font_awesome_flutter: ^10.1.0
   http: ^0.13.4
+  beamer: ^1.4.1+1
 
 dev_dependencies:
   flutter_test:

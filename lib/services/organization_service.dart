@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:js';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
@@ -27,8 +25,8 @@ class Organization {
         createdAt: DateTime.parse(json['createdAt']),
         updatedAt: DateTime.parse(json['updatedAt']),
         deletedAt: json.containsKey('deletedAt') &&
-                json['deletedAt'] != null &&
-                json['deletedAt']['Valid']
+            json['deletedAt'] != null &&
+            json['deletedAt']['Valid']
             ? DateTime.parse(json['deletedAt'])
             : null,
         name: json['name'],
@@ -37,10 +35,26 @@ class Organization {
 }
 
 class OrganizationService {
+
+  static Future<Organization?> create(String name) async {
+    var token = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final response = await http.post(
+        Uri.parse('//convention.ninja/api/orgs'), headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    }, body: jsonEncode(<String, String>{
+      'name': name
+    }));
+    if(response.statusCode >= 200 && response.statusCode < 300) {
+      return Organization.fromJson(jsonDecode(response.body));
+    }
+    return null;
+  }
+
   static Future<Organization?> get(String id) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response =
-        await http.get(Uri.parse('//convention.ninja/api/orgs/$id'), headers: {
+    await http.get(Uri.parse('//convention.ninja/api/orgs/$id'), headers: {
       'Authorization': 'Bearer $token',
     });
 
@@ -51,9 +65,12 @@ class OrganizationService {
   }
 
   static Future<List<Organization>> getAll() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return [];
+    }
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response =
-        await http.get(Uri.parse('//convention.ninja/api/orgs'), headers: {
+    await http.get(Uri.parse('//convention.ninja/api/orgs'), headers: {
       'Authorization': 'Bearer $token',
     });
     if (response.statusCode >= 200 && response.statusCode < 300) {

@@ -1,12 +1,16 @@
 import 'dart:async';
 
-import 'package:convention_ninja/pages/landing_page.dart';
-import 'package:convention_ninja/router.dart';
+import 'package:beamer/beamer.dart';
+
+// import 'package:convention_ninja/pages/landing_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'components/admin_scaffold.dart';
+
+// import 'components/admin_scaffold.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'locations/home_location.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,23 +19,6 @@ Future<void> main() async {
   );
   runApp(const MyApp());
 }
-
-var _homeRoute = RouteParser.parseRoute('/');
-var _loginRoute = RouteParser.parseRoute('/login');
-var _dashboardRoute = RouteParser.parseRoute('/dashboard');
-var _dashboardOrgNewRoute = RouteParser.parseRoute('/dashboard/new');
-var _dashboardOrgRoute = RouteParser.parseRoute('/dashboard/:orgId');
-var _inventoryRoute = RouteParser.parseRoute('/dashboard/:orgId/inventory');
-var _inventoryCatRoute =
-    RouteParser.parseRoute('/dashboard/:orgId/inventory/categories');
-var _inventoryMfgRoute =
-    RouteParser.parseRoute('/dashboard/:orgId/inventory/manufacturers');
-var _inventoryModelRoute =
-    RouteParser.parseRoute('/dashboard/:orgId/inventory/models');
-var _inventoryAssetRoute =
-    RouteParser.parseRoute('/dashboard/:orgId/inventory/assets');
-var _inventoryManifestRoute =
-    RouteParser.parseRoute('/dashboard/:orgId/inventory/manifests');
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -45,6 +32,11 @@ class MyAppState extends State<MyApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   late String _organization;
   bool _fbLoaded = false;
+
+  final routerDelegate = BeamerDelegate(
+    transitionDelegate: const NoAnimationTransitionDelegate(),
+    locationBuilder: (routeInformation, _) => HomeLocation(routeInformation),
+  );
 
   @override
   void initState() {
@@ -79,7 +71,7 @@ class MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  Route<dynamic> generateRoute(settings) {
+  /*Route<dynamic> generateRoute(settings) {
     var routeParams = <String>[];
     var route = settings.name;
     if(FirebaseAuth.instance.currentUser == null) {
@@ -143,7 +135,7 @@ class MyAppState extends State<MyApp> {
           },
           settings: RouteSettings(name: route));
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +147,19 @@ class MyAppState extends State<MyApp> {
             return Container();
           }
           _fbLoaded = true;
-          return MaterialApp(
+          return MaterialApp.router(
+            routeInformationParser: BeamerParser(),
+            routerDelegate: routerDelegate,
+            debugShowCheckedModeBanner: false,
+            title: 'Convention.Ninja',
+            darkTheme: ThemeData.from(
+                colorScheme: ColorScheme.fromSwatch(
+                    primarySwatch: Colors.deepOrange,
+                    brightness: Brightness.dark),
+                useMaterial3: true),
+            themeMode: ThemeMode.dark,
+          );
+          /*return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Convention.Ninja',
             navigatorKey: _navigatorKey,
@@ -169,7 +173,7 @@ class MyAppState extends State<MyApp> {
               return [generateRoute(RouteSettings(name: initialRoute))];
             },
             onGenerateRoute: generateRoute,
-          );
+          );*/
         });
   }
 }
