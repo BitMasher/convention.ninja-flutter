@@ -19,8 +19,6 @@ class HomeLocation extends BeamLocation<BeamState> {
           check: (context, location) =>
               FirebaseAuth.instance.currentUser != null,
           beamToNamed: (origin, target) {
-            print("login");
-            print(FirebaseAuth.instance.currentUser);
             return '/login';
             },
         ),
@@ -29,8 +27,6 @@ class HomeLocation extends BeamLocation<BeamState> {
           check: (context, location) =>
               FirebaseAuth.instance.currentUser == null,
           beamToNamed: (origin, target) {
-            print("dashboard");
-            print(FirebaseAuth.instance.currentUser);
             return '/dashboard';
           },
         )
