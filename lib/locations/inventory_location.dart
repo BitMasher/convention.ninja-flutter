@@ -33,7 +33,7 @@ class InventoryLocation extends BeamLocation<BeamState> {
             key: ValueKey(
                 'inventory-categories-${state.pathParameters['orgId']}'),
             title: 'Asset Categories',
-            child: const InventoryCategoriesPage())
+            child: InventoryCategoriesPage(orgId: state.pathParameters['orgId']!))
       ];
     } else {
       return [

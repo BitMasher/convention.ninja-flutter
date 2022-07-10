@@ -53,10 +53,8 @@ class AdminScaffold extends StatelessWidget {
                       initialPath: Beamer.of(context).configuration.location ?? '/',
                       updateParent: false,
                       buildListener: (ctx, del) {
-                        print("build listener ${ctx.currentBeamLocation} ${del.configuration.location}");
                       },
                       routeListener: (routeInformation, del) {
-                        print("route listener ${routeInformation.location} ${del.currentBeamLocation}");
                       },
                       locationBuilder: (routeInformation, _) {
                         if (routeInformation.location!.contains("/inventory")) {

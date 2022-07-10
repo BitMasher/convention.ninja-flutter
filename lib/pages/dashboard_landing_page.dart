@@ -1,4 +1,3 @@
-
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -16,25 +15,32 @@ class DashboardLandingPage extends StatelessWidget {
         future: organizations,
         initialData: const [],
         builder: (context, snapshot) {
-          if(snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.connectionState == ConnectionState.done) {
             return ListView(
-              padding: const EdgeInsets.all(8),
-              children: <Widget>[
-                for (var value in snapshot.data!)
+                padding: const EdgeInsets.all(8),
+                children: <Widget>[
+                  for (var value in snapshot.data!)
+                    ListTile(
+                        leading: const FaIcon(FontAwesomeIcons.solidFolder),
+                        title: Text(value.name),
+                        onTap: () {
+                          Beamer.of(context)
+                              .parent
+                              ?.beamToNamed('/dashboard/${value.id}');
+                        }),
                   ListTile(
-                    leading: const FaIcon(FontAwesomeIcons.solidFolder),
-                    title: Text(value.name),
-                    onTap: () {
-                      Beamer.of(context).parent?.beamToNamed('/dashboard/${value.id}');
-                    }
-                  )
-              ]
-            );
+                      leading: const FaIcon(FontAwesomeIcons.folderPlus),
+                      title: const Text('New Organization'),
+                      onTap: () {
+                        Beamer.of(context)
+                            .parent
+                            ?.beamToNamed('/dashboard/new');
+                      })
+                ]);
           }
           return const SelectableText("loading...");
         },
       ),
     );
   }
-
 }
