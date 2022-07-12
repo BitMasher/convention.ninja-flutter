@@ -54,4 +54,51 @@ class InventoryService {
     }
     return [];
   }
+
+  static Future<Category?> createCategory(String orgId, String name) async {
+    var token = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final response = await http.post(
+        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/categories'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, String>{'name': name}));
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return Category.fromJson(jsonDecode(response.body));
+    }
+    return null;
+  }
+
+  static Future<Category?> updateCategory(
+      String orgId, String categoryId, String name) async {
+    var token = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final response = await http.put(
+        Uri.parse(
+            '//convention.ninja/api/orgs/$orgId/inventory/categories/$categoryId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, String>{'name': name}));
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return Category.fromJson(jsonDecode(response.body));
+    }
+    return null;
+  }
+
+  static Future<bool> deleteCategory(String orgId, String categoryId) async {
+    var token = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final response = await http.delete(
+        Uri.parse(
+            '//convention.ninja/api/orgs/$orgId/inventory/categories/$categoryId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        });
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return true;
+    }
+    return false;
+  }
 }

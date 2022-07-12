@@ -46,6 +46,7 @@ class AdminMenuPanel extends StatelessWidget {
                   semanticLabel: 'Categories',
                 ),
               ),
+              selected: true,
               minLeadingWidth: 5.0,
               title: const Text(
                 'Categories',

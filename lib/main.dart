@@ -52,7 +52,6 @@ class MyAppState extends State<MyApp> {
     return StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (_, snapshot) {
-          print("fb update $snapshot");
           if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
             return const Center(child: Text('loading...', textDirection: TextDirection.ltr,));
           }
