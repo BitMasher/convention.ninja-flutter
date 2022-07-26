@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../services/inventory_service.dart';
 
-class InventoryCategoriesPage extends StatelessWidget {
-  const InventoryCategoriesPage({Key? key, required this.orgId})
+class InventoryManufacturersPage extends StatelessWidget {
+  const InventoryManufacturersPage({Key? key, required this.orgId})
       : super(key: key);
   final String orgId;
 
@@ -11,13 +11,13 @@ class InventoryCategoriesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: CategoriesDataTable(orgId: orgId),
+      child: ManufacturersDataTable(orgId: orgId),
     );
   }
 }
 
-class CategoriesDataTable extends StatefulWidget {
-  const CategoriesDataTable({
+class ManufacturersDataTable extends StatefulWidget {
+  const ManufacturersDataTable({
     Key? key,
     required this.orgId,
   }) : super(key: key);
@@ -25,15 +25,15 @@ class CategoriesDataTable extends StatefulWidget {
   final String orgId;
 
   @override
-  State<CategoriesDataTable> createState() => _CategoriesDataTableState();
+  State<ManufacturersDataTable> createState() => _ManufacturersDataTableState();
 }
 
-class _CategoriesDataTableState extends State<CategoriesDataTable> {
-  final GlobalKey<FormFieldState<String>> _newCatField =
+class _ManufacturersDataTableState extends State<ManufacturersDataTable> {
+  final GlobalKey<FormFieldState<String>> _newMfgField =
       GlobalKey<FormFieldState<String>>();
-  final GlobalKey<FormFieldState<String>> _editCatField =
+  final GlobalKey<FormFieldState<String>> _editMfgField =
       GlobalKey<FormFieldState<String>>();
-  late Future<List<Category>> _categories;
+  late Future<List<Manufacturer>> _manufacturers;
   String _editId = '';
   String? _updateName;
   String? _newName;
@@ -43,19 +43,19 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
   @override
   void initState() {
     super.initState();
-    _categories = InventoryService.getCategories(widget.orgId);
+    _manufacturers = InventoryService.getManufacturers(widget.orgId);
   }
 
   @override
   Widget build(BuildContext context) {
     if (!_asyncNewValidation) {
-      _newCatField.currentState?.validate();
+      _newMfgField.currentState?.validate();
     }
     if (!_asyncEditValidation) {
-      _editCatField.currentState?.validate();
+      _editMfgField.currentState?.validate();
     }
-    return FutureBuilder<List<Category>>(
-        future: _categories,
+    return FutureBuilder<List<Manufacturer>>(
+        future: _manufacturers,
         initialData: const [],
         builder: (context, snapshot) {
           return Table(
@@ -81,28 +81,29 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
         });
   }
 
-  TableRow buildNewRow(AsyncSnapshot<List<Category>> snapshot) {
+  TableRow buildNewRow(AsyncSnapshot<List<Manufacturer>> snapshot) {
     return TableRow(children: [
       const TableCell(child: Text('')),
       TableCell(
           child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
-                key: _newCatField,
-                decoration: const InputDecoration(hintText: 'Category Name'),
+                key: _newMfgField,
+                decoration:
+                    const InputDecoration(hintText: 'Manufacturer Name'),
                 onFieldSubmitted: (_) async {
                   await onNewSubmit();
                 },
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a valid category name';
+                    return 'Please enter a valid manufacturer name';
                   }
                   if (snapshot.data!.any((element) =>
                       element.name.toLowerCase() == value.toLowerCase())) {
-                    return 'Category already exists';
+                    return 'Manufacturer already exists';
                   }
                   if (!_asyncNewValidation) {
-                    return 'Category already exists';
+                    return 'Manufacturer already exists';
                   }
                   return null;
                 },
@@ -119,11 +120,12 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
   }
 
   Future<void> onNewSubmit() async {
-    if (!_newCatField.currentState!.validate()) {
+    if (!_newMfgField.currentState!.validate()) {
       return;
     }
-    _newCatField.currentState?.save();
-    var cat = await InventoryService.createCategory(widget.orgId, _newName!);
+    _newMfgField.currentState?.save();
+    var cat =
+        await InventoryService.createManufacturer(widget.orgId, _newName!);
     if (cat == null) {
       setState(() {
         _asyncNewValidation = false;
@@ -131,15 +133,15 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
     } else {
       setState(() {
         _newName = null;
-        _newCatField.currentState?.reset();
+        _newMfgField.currentState?.reset();
         _asyncNewValidation = true;
-        _categories = InventoryService.getCategories(widget.orgId);
+        _manufacturers = InventoryService.getManufacturers(widget.orgId);
       });
     }
   }
 
   TableRow buildDataRow(
-      Category entry, AsyncSnapshot<List<Category>> snapshot) {
+      Manufacturer entry, AsyncSnapshot<List<Manufacturer>> snapshot) {
     return TableRow(children: [
       TableCell(
           child: Padding(
@@ -147,7 +149,7 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
       TableCell(
           child: (_editId == entry.id)
               ? TextFormField(
-                  key: _editCatField,
+                  key: _editMfgField,
                   decoration: const InputDecoration(hintText: 'Updated Name'),
                   initialValue: entry.name,
                   autofocus: true,
@@ -161,10 +163,10 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
                     if (val != entry.name &&
                         snapshot.data!.any((element) =>
                             element.name.toLowerCase() == val.toLowerCase())) {
-                      return 'Category already exists';
+                      return 'Manufacturer already exists';
                     }
                     if (!_asyncEditValidation) {
-                      return 'Category already exists';
+                      return 'Manufacturer already exists';
                     }
                     return null;
                   },
@@ -206,10 +208,12 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
         if (_editId != entry.id)
           ElevatedButton(
               onPressed: () async {
-                await InventoryService.deleteCategory(widget.orgId, entry.id);
+                await InventoryService.deleteManufacturer(
+                    widget.orgId, entry.id);
                 setState(() {
                   _asyncEditValidation = true;
-                  _categories = InventoryService.getCategories(widget.orgId);
+                  _manufacturers =
+                      InventoryService.getManufacturers(widget.orgId);
                 });
               },
               child: const Text('Delete')),
@@ -217,11 +221,11 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
     ]);
   }
 
-  Future<void> onUpdateSubmit(Category entry) async {
-    if (!_editCatField.currentState!.validate()) {
+  Future<void> onUpdateSubmit(Manufacturer entry) async {
+    if (!_editMfgField.currentState!.validate()) {
       return;
     }
-    _editCatField.currentState?.save();
+    _editMfgField.currentState?.save();
     if (_updateName == null) {
       setState(() {
         _editId = '';
@@ -229,7 +233,7 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
       });
       return;
     }
-    var cat = await InventoryService.updateCategory(
+    var cat = await InventoryService.updateManufacturer(
         widget.orgId, entry.id, _updateName!);
     if (cat == null) {
       setState(() {
@@ -240,7 +244,7 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
         _editId = '';
         _updateName = null;
         _asyncEditValidation = true;
-        _categories = InventoryService.getCategories(widget.orgId);
+        _manufacturers = InventoryService.getManufacturers(widget.orgId);
       });
     }
     return;

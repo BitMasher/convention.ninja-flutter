@@ -1,5 +1,7 @@
 import 'package:beamer/beamer.dart';
 import 'package:convention_ninja/pages/inventory_landing_page.dart';
+import 'package:convention_ninja/pages/inventory_manufacturers_page.dart';
+import 'package:convention_ninja/pages/inventory_models_page.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/inventory_categories_page.dart';
@@ -33,7 +35,24 @@ class InventoryLocation extends BeamLocation<BeamState> {
             key: ValueKey(
                 'inventory-categories-${state.pathParameters['orgId']}'),
             title: 'Asset Categories',
-            child: InventoryCategoriesPage(orgId: state.pathParameters['orgId']!))
+            child:
+                InventoryCategoriesPage(orgId: state.pathParameters['orgId']!))
+      ];
+    } else if (state.uri.path.endsWith('/manufacturers')) {
+      return [
+        BeamPage(
+            key: ValueKey(
+                'inventory-manufacturers-${state.pathParameters['orgId']}'),
+            title: 'Asset Manufacturers',
+            child: InventoryManufacturersPage(
+                orgId: state.pathParameters['orgId']!))
+      ];
+    } else if (state.uri.path.endsWith('/models')) {
+      return [
+        BeamPage(
+            key: ValueKey('inventory-models-${state.pathParameters['orgId']}'),
+            title: 'Asset Models',
+            child: InventoryModelsPage(orgId: state.pathParameters['orgId']!))
       ];
     } else {
       return [
