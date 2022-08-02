@@ -33,6 +33,7 @@ class _ManufacturersDataTableState extends State<ManufacturersDataTable> {
       GlobalKey<FormFieldState<String>>();
   final GlobalKey<FormFieldState<String>> _editMfgField =
       GlobalKey<FormFieldState<String>>();
+  final TextEditingController _controller = TextEditingController();
   late Future<List<Manufacturer>> _manufacturers;
   String _editId = '';
   String? _updateName;
@@ -120,6 +121,7 @@ class _ManufacturersDataTableState extends State<ManufacturersDataTable> {
   }
 
   Future<void> onNewSubmit() async {
+    _asyncNewValidation = true;
     if (!_newMfgField.currentState!.validate()) {
       return;
     }
@@ -145,48 +147,53 @@ class _ManufacturersDataTableState extends State<ManufacturersDataTable> {
     return TableRow(children: [
       TableCell(
           child: Padding(
-              padding: const EdgeInsets.all(8.0), child: Text(entry.id))),
+              padding: const EdgeInsets.all(8.0), child: SelectableText(entry.id))),
       TableCell(
           child: (_editId == entry.id)
-              ? TextFormField(
-                  key: _editMfgField,
-                  decoration: const InputDecoration(hintText: 'Updated Name'),
-                  initialValue: entry.name,
-                  autofocus: true,
-                  onFieldSubmitted: (_) async {
-                    await onUpdateSubmit(entry);
-                  },
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return 'Please enter a valid name';
-                    }
-                    if (val != entry.name &&
-                        snapshot.data!.any((element) =>
-                            element.name.toLowerCase() == val.toLowerCase())) {
-                      return 'Manufacturer already exists';
-                    }
-                    if (!_asyncEditValidation) {
-                      return 'Manufacturer already exists';
-                    }
-                    return null;
-                  },
-                  onSaved: (val) {
-                    if (val == entry.name) {
-                      _updateName = null;
-                    } else {
-                      _updateName = val;
-                    }
-                  },
-                )
+              ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                    key: _editMfgField,
+                    decoration: const InputDecoration(hintText: 'Updated Name'),
+                    controller: _controller,
+                    autofocus: true,
+                    onFieldSubmitted: (_) async {
+                      await onUpdateSubmit(entry);
+                    },
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return 'Please enter a valid name';
+                      }
+                      if (val != entry.name &&
+                          snapshot.data!.any((element) =>
+                              element.name.toLowerCase() == val.toLowerCase())) {
+                        return 'Manufacturer already exists';
+                      }
+                      if (!_asyncEditValidation) {
+                        return 'Manufacturer already exists';
+                      }
+                      return null;
+                    },
+                    onSaved: (val) {
+                      if (val == entry.name) {
+                        _updateName = null;
+                      } else {
+                        _updateName = val;
+                      }
+                    },
+                  ),
+              )
               : GestureDetector(
                   onDoubleTap: () {
                     setState(() {
                       _editId = entry.id;
+                      _controller.text = entry.name;
+                      _asyncEditValidation = true;
                     });
                   },
                   child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(entry.name)),
+                      child: SelectableText(entry.name)),
                 )),
       TableCell(
           child: Row(children: [
@@ -208,6 +215,15 @@ class _ManufacturersDataTableState extends State<ManufacturersDataTable> {
         if (_editId != entry.id)
           ElevatedButton(
               onPressed: () async {
+                setState(() {
+                  _editId = entry.id;
+                  _controller.text = entry.name;
+                });
+              },
+              child: const Text('Edit')),
+        if (_editId != entry.id)
+          ElevatedButton(
+              onPressed: () async {
                 await InventoryService.deleteManufacturer(
                     widget.orgId, entry.id);
                 setState(() {
@@ -222,6 +238,7 @@ class _ManufacturersDataTableState extends State<ManufacturersDataTable> {
   }
 
   Future<void> onUpdateSubmit(Manufacturer entry) async {
+    _asyncEditValidation = true;
     if (!_editMfgField.currentState!.validate()) {
       return;
     }

@@ -4,6 +4,8 @@ import 'package:convention_ninja/pages/inventory_manufacturers_page.dart';
 import 'package:convention_ninja/pages/inventory_models_page.dart';
 import 'package:flutter/material.dart';
 
+import '../pages/inventory_asset_modify.dart';
+import '../pages/inventory_assets_page.dart';
 import '../pages/inventory_categories_page.dart';
 
 class InventoryLocation extends BeamLocation<BeamState> {
@@ -17,6 +19,7 @@ class InventoryLocation extends BeamLocation<BeamState> {
         '/dashboard/:orgId/inventory/manufacturers',
         '/dashboard/:orgId/inventory/models',
         '/dashboard/:orgId/inventory/assets',
+        '/dashboard/:orgId/inventory/assets/new',
         '/dashboard/:orgId/inventory/manifests',
       ];
 
@@ -53,6 +56,21 @@ class InventoryLocation extends BeamLocation<BeamState> {
             key: ValueKey('inventory-models-${state.pathParameters['orgId']}'),
             title: 'Asset Models',
             child: InventoryModelsPage(orgId: state.pathParameters['orgId']!))
+      ];
+    } else if (state.uri.path.endsWith('/assets')) {
+      return [
+        BeamPage(
+            key: ValueKey('inventory-assets-${state.pathParameters['orgId']}'),
+            title: 'Assets',
+            child: InventoryAssetsPage(orgId: state.pathParameters['orgId']!))
+      ];
+    } else if (state.uri.path.endsWith('/assets/new')) {
+      return [
+        BeamPage(
+          key: ValueKey('inventory-assets-new-${state.pathParameters['orgId']}'),
+          title: 'New Asset',
+          child: InventoryAssetModify(orgId: state.pathParameters['orgId']!, assetId: null)
+        )
       ];
     } else {
       return [

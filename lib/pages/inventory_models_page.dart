@@ -40,6 +40,7 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
       GlobalKey<FormFieldState<String>>();
   final GlobalKey<FormFieldState<String>> _editMfgField =
       GlobalKey<FormFieldState<String>>();
+  final TextEditingController _controller = TextEditingController();
   late Future<List<Model>> _models;
   String _editId = '';
   String? _updateName;
@@ -71,6 +72,7 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
         builder: (context, snapshot) {
           return Table(
             border: TableBorder.symmetric(inside: const BorderSide(width: 1.0)),
+            defaultColumnWidth: const IntrinsicColumnWidth(),
             children: [
               const TableRow(children: [
                 TableCell(
@@ -186,6 +188,7 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
   }
 
   Future<void> onNewSubmit() async {
+    _asyncNewValidation = true;
     if (!_newModelField.currentState!.validate() ||
         _newCatId == null ||
         _newMfgId == null) {
@@ -216,45 +219,47 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
     return TableRow(children: [
       TableCell(
           child: Padding(
-              padding: const EdgeInsets.all(8.0), child: Text(entry.id))),
+              padding: const EdgeInsets.all(8.0), child: SelectableText(entry.id))),
       TableCell(
           child: (_editId == entry.id)
-              ? TextFormField(
-                  key: _editModelField,
-                  decoration: const InputDecoration(hintText: 'Updated Name'),
-                  initialValue: entry.name,
-                  autofocus: true,
-                  onFieldSubmitted: (_) async {
-                    await onUpdateSubmit(entry);
-                  },
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return 'Please enter a valid name';
-                    }
-                    if (!_asyncEditValidation) {
-                      return 'Model already exists';
-                    }
-                    return null;
-                  },
-                  onSaved: (val) {
-                    if (val == entry.name) {
-                      _updateName = null;
-                    } else {
+              ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                    key: _editModelField,
+                    controller: _controller,
+                    decoration: const InputDecoration(hintText: 'Updated Name'),
+                    autofocus: true,
+                    onFieldSubmitted: (_) async {
+                      await onUpdateSubmit(entry);
+                    },
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return 'Please enter a valid name';
+                      }
+                      if (!_asyncEditValidation) {
+                        return 'Model already exists';
+                      }
+                      return null;
+                    },
+                    onSaved: (val) {
                       _updateName = val;
-                    }
-                  },
-                )
+                    },
+                  ),
+              )
               : GestureDetector(
                   onDoubleTap: () {
                     setState(() {
                       _editId = entry.id;
+                      _editModelField.currentState?.reset();
+                      _controller.text = entry.name;
+                      _updateName = entry.name;
                       _updateCatId = entry.categoryId;
                       _updateMfgId = entry.manufacturerId;
                     });
                   },
                   child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(entry.name)),
+                      child: SelectableText(entry.name)),
                 )),
       TableCell(
           child: (_editId == entry.id)
@@ -285,13 +290,16 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
                   onDoubleTap: () {
                     setState(() {
                       _editId = entry.id;
+                      _editModelField.currentState?.reset();
+                      _controller.text = entry.name;
+                      _updateName = entry.name;
                       _updateCatId = entry.categoryId;
                       _updateMfgId = entry.manufacturerId;
                     });
                   },
                   child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(entry.category?.name ?? entry.categoryId)),
+                      child: SelectableText(entry.category?.name ?? entry.categoryId)),
                 )),
       TableCell(
           child: (_editId == entry.id)
@@ -322,13 +330,16 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
                   onDoubleTap: () {
                     setState(() {
                       _editId = entry.id;
+                      _editModelField.currentState?.reset();
+                      _controller.text = entry.name;
+                      _updateName = entry.name;
                       _updateCatId = entry.categoryId;
                       _updateMfgId = entry.manufacturerId;
                     });
                   },
                   child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(
+                      child: SelectableText(
                           entry.manufacturer?.name ?? entry.manufacturerId)),
                 )),
       TableCell(
@@ -351,6 +362,19 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
         if (_editId != entry.id)
           ElevatedButton(
               onPressed: () async {
+                setState(() {
+                  _editId = entry.id;
+                  _editModelField.currentState?.reset();
+                  _controller.text = entry.name;
+                  _updateName = entry.name;
+                  _updateCatId = entry.categoryId;
+                  _updateMfgId = entry.manufacturerId;
+                });
+              },
+              child: const Text('Edit')),
+        if (_editId != entry.id)
+          ElevatedButton(
+              onPressed: () async {
                 await InventoryService.deleteModel(widget.orgId, entry.id);
                 setState(() {
                   _asyncEditValidation = true;
@@ -363,9 +387,10 @@ class _ModelsDataTableState extends State<ModelsDataTable> {
   }
 
   Future<void> onUpdateSubmit(Model entry) async {
-    if (!_editModelField.currentState!.validate() &&
-        _updateCatId != null &&
-        _updateMfgId != null) {
+    _asyncEditValidation = true;
+    if (!_editModelField.currentState!.validate() ||
+        _updateCatId == null ||
+        _updateMfgId == null) {
       return;
     }
     _editModelField.currentState?.save();

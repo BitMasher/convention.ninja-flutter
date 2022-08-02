@@ -33,6 +33,7 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
       GlobalKey<FormFieldState<String>>();
   final GlobalKey<FormFieldState<String>> _editCatField =
       GlobalKey<FormFieldState<String>>();
+  final TextEditingController _controller = TextEditingController();
   late Future<List<Category>> _categories;
   String _editId = '';
   String? _updateName;
@@ -119,6 +120,7 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
   }
 
   Future<void> onNewSubmit() async {
+    _asyncNewValidation = true;
     if (!_newCatField.currentState!.validate()) {
       return;
     }
@@ -143,48 +145,53 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
     return TableRow(children: [
       TableCell(
           child: Padding(
-              padding: const EdgeInsets.all(8.0), child: Text(entry.id))),
+              padding: const EdgeInsets.all(8.0), child: SelectableText(entry.id))),
       TableCell(
           child: (_editId == entry.id)
-              ? TextFormField(
-                  key: _editCatField,
-                  decoration: const InputDecoration(hintText: 'Updated Name'),
-                  initialValue: entry.name,
-                  autofocus: true,
-                  onFieldSubmitted: (_) async {
-                    await onUpdateSubmit(entry);
-                  },
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return 'Please enter a valid name';
-                    }
-                    if (val != entry.name &&
-                        snapshot.data!.any((element) =>
-                            element.name.toLowerCase() == val.toLowerCase())) {
-                      return 'Category already exists';
-                    }
-                    if (!_asyncEditValidation) {
-                      return 'Category already exists';
-                    }
-                    return null;
-                  },
-                  onSaved: (val) {
-                    if (val == entry.name) {
-                      _updateName = null;
-                    } else {
-                      _updateName = val;
-                    }
-                  },
-                )
+              ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                    key: _editCatField,
+                    decoration: const InputDecoration(hintText: 'Updated Name'),
+                    controller: _controller,
+                    autofocus: true,
+                    onFieldSubmitted: (_) async {
+                      await onUpdateSubmit(entry);
+                    },
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return 'Please enter a valid name';
+                      }
+                      if (val != entry.name &&
+                          snapshot.data!.any((element) =>
+                              element.name.toLowerCase() == val.toLowerCase())) {
+                        return 'Category already exists';
+                      }
+                      if (!_asyncEditValidation) {
+                        return 'Category already exists';
+                      }
+                      return null;
+                    },
+                    onSaved: (val) {
+                      if (val == entry.name) {
+                        _updateName = null;
+                      } else {
+                        _updateName = val;
+                      }
+                    },
+                  ),
+              )
               : GestureDetector(
                   onDoubleTap: () {
                     setState(() {
                       _editId = entry.id;
+                      _controller.text = entry.name;
+                      _asyncEditValidation = true;
                     });
                   },
                   child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(entry.name)),
+                      child: SelectableText(entry.name)),
                 )),
       TableCell(
           child: Row(children: [
@@ -206,6 +213,15 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
         if (_editId != entry.id)
           ElevatedButton(
               onPressed: () async {
+                setState(() {
+                  _editId = entry.id;
+                  _controller.text = entry.name;
+                });
+              },
+              child: const Text('Edit')),
+        if (_editId != entry.id)
+          ElevatedButton(
+              onPressed: () async {
                 await InventoryService.deleteCategory(widget.orgId, entry.id);
                 setState(() {
                   _asyncEditValidation = true;
@@ -218,6 +234,7 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
   }
 
   Future<void> onUpdateSubmit(Category entry) async {
+    _asyncEditValidation = true;
     if (!_editCatField.currentState!.validate()) {
       return;
     }
