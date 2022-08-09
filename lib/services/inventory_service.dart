@@ -26,7 +26,7 @@ class Category {
         deletedAt: json.containsKey('deletedAt') &&
                 json['deletedAt'] != null &&
                 json['deletedAt']['Valid']
-            ? DateTime.parse(json['deletedAt'])
+            ? DateTime.parse(json['deletedAt']['Time'])
             : null,
         name: json['name'],
         organizationId: json['organizationId']);
@@ -57,7 +57,7 @@ class Manufacturer {
         deletedAt: json.containsKey('deletedAt') &&
                 json['deletedAt'] != null &&
                 json['deletedAt']['Valid']
-            ? DateTime.parse(json['deletedAt'])
+            ? DateTime.parse(json['deletedAt']['Time'])
             : null,
         name: json['name'],
         organizationId: json['organizationId']);
@@ -96,7 +96,7 @@ class Model {
         deletedAt: json.containsKey('deletedAt') &&
                 json['deletedAt'] != null &&
                 json['deletedAt']['Valid']
-            ? DateTime.parse(json['deletedAt'])
+            ? DateTime.parse(json['deletedAt']['Time'])
             : null,
         name: json['name'],
         organizationId: json['organizationId'],
@@ -137,7 +137,7 @@ class AssetTag {
       deletedAt: json.containsKey('deletedAt') &&
               json['deletedAt'] != null &&
               json['deletedAt']['Valid']
-          ? DateTime.parse(json['deletedAt'])
+          ? DateTime.parse(json['deletedAt']['Time'])
           : null,
       tagId: json['tagId'],
       assetId: json['assetId'],
@@ -184,10 +184,11 @@ class Asset {
         deletedAt: json.containsKey('deletedAt') &&
                 json['deletedAt'] != null &&
                 json['deletedAt']['Valid']
-            ? DateTime.parse(json['deletedAt'])
+            ? DateTime.parse(json['deletedAt']['Time'])
             : null,
         organizationId: json['organizationId'],
         modelId: json['modelId'],
+        serialNumber: json['serialNumber'],
         assetTags: tags,
         roomId: json['roomId'],
         model:
@@ -420,6 +421,20 @@ class InventoryService {
     return false;
   }
 
+  static Future<Asset?> getAsset(String orgId, String assetId) async {
+    var token = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final response = await http.get(
+        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/assets/$assetId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        });
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return Asset.fromJson(jsonDecode(response.body));
+    }
+    return null;
+  }
+
   static Future<List<Asset>> getAssets(String orgId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
@@ -442,7 +457,7 @@ class InventoryService {
   }
 
   static Future<Asset?> createAsset(String orgId, String modelId,
-      String serialNumber, List<String> tags) async {
+      String? serialNumber, List<String> tags) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
         Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/assets'),

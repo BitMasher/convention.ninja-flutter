@@ -20,6 +20,7 @@ class InventoryLocation extends BeamLocation<BeamState> {
         '/dashboard/:orgId/inventory/models',
         '/dashboard/:orgId/inventory/assets',
         '/dashboard/:orgId/inventory/assets/new',
+        '/dashboard/:orgId/inventory/assets/:assetId',
         '/dashboard/:orgId/inventory/manifests',
       ];
 
@@ -67,10 +68,21 @@ class InventoryLocation extends BeamLocation<BeamState> {
     } else if (state.uri.path.endsWith('/assets/new')) {
       return [
         BeamPage(
-          key: ValueKey('inventory-assets-new-${state.pathParameters['orgId']}'),
-          title: 'New Asset',
-          child: InventoryAssetModify(orgId: state.pathParameters['orgId']!, assetId: null)
-        )
+            key: ValueKey(
+                'inventory-assets-new-${state.pathParameters['orgId']}'),
+            title: 'New Asset',
+            child: InventoryAssetModify(
+                orgId: state.pathParameters['orgId']!, assetId: null))
+      ];
+    } else if (state.uri.path.contains('/assets/')) {
+      return [
+        BeamPage(
+            key: ValueKey(
+                'inventory-assets-update-${state.pathParameters['assetId']}-${state.pathParameters['orgId']}'),
+            title: 'Modify Asset',
+            child: InventoryAssetModify(
+                orgId: state.pathParameters['orgId']!,
+                assetId: state.pathParameters['assetId']!))
       ];
     } else {
       return [

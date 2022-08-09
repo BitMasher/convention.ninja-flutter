@@ -50,37 +50,39 @@ class _AssetsDataTableState extends State<AssetsDataTable> {
               TableRow(children: [
                 const TableCell(
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text('Id')),
-                    )),
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: Text('Id')),
+                )),
                 const TableCell(
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text('Serial')),
-                    )),
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: Text('Serial')),
+                )),
                 const TableCell(
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text('Model')),
-                    )),
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: Text('Model')),
+                )),
                 const TableCell(
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text('Manufacturer')),
-                    )),
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: Text('Manufacturer')),
+                )),
                 const TableCell(
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text('Tags')),
-                    )
-                ),
-                TableCell(child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(child: ElevatedButton(onPressed: () {
-                      context.beamToNamed(
-                          "/dashboard/${widget.orgId}/inventory/assets/new");
-                    }, child: const Text("New")))
-                ))
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: Text('Tags')),
+                )),
+                TableCell(
+                    child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  context.beamToNamed(
+                                      "/dashboard/${widget.orgId}/inventory/assets/new");
+                                },
+                                child: const Text("New")))))
               ]),
               for (var entry in snapshot.data!) buildDataRow(entry, snapshot)
             ],
@@ -105,20 +107,31 @@ class _AssetsDataTableState extends State<AssetsDataTable> {
       TableCell(
           child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: SelectableText(
-                  entry.model?.manufacturer?.name ?? entry.model?.manufacturerId ?? ''))),
+              child: SelectableText(entry.model?.manufacturer?.name ??
+                  entry.model?.manufacturerId ??
+                  ''))),
       TableCell(
-          child: Row(children: [
-            ElevatedButton(onPressed: () async {}, child: const Text('Edit')),
-            ElevatedButton(
-                onPressed: () async {
-                  await InventoryService.deleteAsset(widget.orgId, entry.id);
-                  setState(() {
-                    _assets = InventoryService.getAssets(widget.orgId);
-                  });
-                },
-                child: const Text('Delete')),
-          ]))
+          child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SelectableText(
+                  entry.assetTags.map((e) => e.tagId).join(", ")))),
+      TableCell(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+        ElevatedButton(onPressed: () async {
+          context.beamToNamed(
+              "/dashboard/${widget.orgId}/inventory/assets/${entry.id}");
+        }, child: const Text('Edit')),
+        ElevatedButton(
+            onPressed: () async {
+              await InventoryService.deleteAsset(widget.orgId, entry.id);
+              setState(() {
+                _assets = InventoryService.getAssets(widget.orgId);
+              });
+            },
+            child: const Text('Delete')),
+      ]))
     ]);
   }
 }

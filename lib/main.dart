@@ -66,12 +66,12 @@ class MyAppState extends State<MyApp> {
                   routerDelegate: routerDelegate,
                   debugShowCheckedModeBanner: false,
                   title: 'Convention.Ninja',
-                  darkTheme: ThemeData.from(
-                      colorScheme: ColorScheme.fromSwatch(
+                  /*darkTheme: ThemeData.from(
+                      colorScheme: ColorScheme.dark(),*//*fromSwatch(
                           primarySwatch: Colors.deepOrange,
-                          brightness: Brightness.dark),
+                          brightness: Brightness.dark),*//*
                       useMaterial3: true),
-                  themeMode: ThemeMode.dark,
+                  themeMode: ThemeMode.dark,*/
                 );
               });
         });
