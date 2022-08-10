@@ -516,7 +516,7 @@ class InventoryService {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(<String, String>{tagId: tagId}));
+        body: jsonEncode(<String, String>{'tagId': tagId}));
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return AssetTag.fromJson(jsonDecode(response.body));
     }

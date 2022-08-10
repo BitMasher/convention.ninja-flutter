@@ -20,14 +20,14 @@ class DashboardLocation extends BeamLocation<BeamState> {
   List<BeamPage> buildPages(BuildContext context, BeamState state) {
     if (state.uri.path == "/dashboard") {
       return const [
-        BeamPage(title: 'Dashboard', child: DashboardLandingPage())
+        BeamPage(key: ValueKey('dashboard'), title: 'Dashboard', child: DashboardLandingPage())
       ];
     }
     if (state.uri.path == "/dashboard/new") {
-      return const [BeamPage(title: 'New Org', child: DashboardCreationPage())];
+      return const [BeamPage(key: ValueKey('dashboard-new'), title: 'New Org', child: DashboardCreationPage())];
     }
     return [
-      BeamPage(title: 'Dashboard 404', child: SelectableText(state.uri.path))
+      BeamPage(key: const ValueKey('dashboard-404'), title: 'Dashboard 404', child: SelectableText(state.uri.path))
     ];
   }
 }

@@ -46,6 +46,9 @@ class _InventoryAssetModifyState extends State<InventoryAssetModify> {
     if (widget.assetId != null && widget.assetId?.isNotEmpty == true) {
       _asset = await InventoryService.getAsset(widget.orgId, widget.assetId!);
       if (_asset != null) {
+        _assetTags.addAll(_asset!.assetTags);
+      }
+      if (_asset != null) {
         updateModels(_asset!.model!.manufacturerId);
       }
     }
@@ -218,18 +221,21 @@ class _InventoryAssetModifyState extends State<InventoryAssetModify> {
                           return;
                         }
                       } else {
-                        var res = await InventoryService.updateAsset(
-                            widget.orgId, widget.assetId!,
-                            modelId:
-                                _asset?.modelId != _modelId ? _modelId : null,
-                            serialNumber: _asset?.serialNumber != _serialNumber
-                                ? _serialNumber
-                                : null);
-                        if (res == null) {
-                          setState(() {
-                            _error = "Failed to save, dunno why";
-                          });
-                          return;
+                        if(_asset?.modelId != _modelId || _asset?.serialNumber != _serialNumber) {
+                          var res = await InventoryService.updateAsset(
+                              widget.orgId, widget.assetId!,
+                              modelId:
+                              _asset?.modelId != _modelId ? _modelId : null,
+                              serialNumber: _asset?.serialNumber !=
+                                  _serialNumber
+                                  ? _serialNumber
+                                  : null);
+                          if (res == null) {
+                            setState(() {
+                              _error = "Failed to save, dunno why";
+                            });
+                            return;
+                          }
                         }
                         for (var delTag in _toDelete) {
                           if (await InventoryService.deleteAssetBarcode(
@@ -242,6 +248,9 @@ class _InventoryAssetModifyState extends State<InventoryAssetModify> {
                           }
                         }
                         for (var addTag in _assetTags) {
+                          if(addTag.id.isNotEmpty) {
+                            continue;
+                          }
                           if (await InventoryService.createAssetBarcode(
                                   widget.orgId,
                                   widget.assetId!,

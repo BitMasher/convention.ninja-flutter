@@ -4,15 +4,26 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../services/organization_service.dart';
 
-class DashboardLandingPage extends StatelessWidget {
+class DashboardLandingPage extends StatefulWidget {
   const DashboardLandingPage({Key? key}) : super(key: key);
 
   @override
+  State<DashboardLandingPage> createState() => _DashboardLandingPageState();
+}
+
+class _DashboardLandingPageState extends State<DashboardLandingPage> {
+  late final Future<List<Organization>> _orgs;
+  @override
+  void initState() {
+    super.initState();
+    _orgs = OrganizationService.getAll();
+    print("init state 2");
+  }
+  @override
   Widget build(BuildContext context) {
-    var organizations = OrganizationService.getAll();
     return Center(
       child: FutureBuilder<List<Organization>>(
-        future: organizations,
+        future: _orgs,
         initialData: const [],
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {

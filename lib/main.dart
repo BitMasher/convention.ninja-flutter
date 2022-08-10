@@ -26,8 +26,24 @@ class MyApp extends StatefulWidget {
   MyAppState createState() => MyAppState();
 }
 
+class _UserValue {
+  final User? firebaseUser;
+  final us.User? cnUser;
+  final bool loading;
+
+  _UserValue({required this.loading, this.firebaseUser, this.cnUser});
+
+  @override
+  String toString() {
+    return '_UserValue{firebaseUser: $firebaseUser, cnUser: $cnUser, loading: $loading}';
+  }
+}
+
 class MyAppState extends State<MyApp> {
+  final GlobalKey _listenerKey = GlobalKey();
   late StreamController<bool> _userLoader;
+  final ValueNotifier<_UserValue> _authNotifier =
+      ValueNotifier<_UserValue>(_UserValue(loading: true));
 
   final routerDelegate = BeamerDelegate(
     transitionDelegate: const NoAnimationTransitionDelegate(),
@@ -37,43 +53,44 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _userLoader = StreamController<bool>(onListen: () async {
-      final user = await us.UserService.me();
-      if (user == null) {
-        _userLoader.add(false);
+    FirebaseAuth.instance.authStateChanges().listen((fbUser) async {
+      if (fbUser != null) {
+        final cnUser = await us.UserService.me();
+        _authNotifier.value =
+            _UserValue(loading: false, firebaseUser: fbUser, cnUser: cnUser);
       } else {
-        _userLoader.add(true);
+        _authNotifier.value = _UserValue(loading: false);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (_, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-            return const Center(child: Text('loading...', textDirection: TextDirection.ltr,));
+    print("build");
+    return ValueListenableBuilder<_UserValue>(
+        key: _listenerKey,
+        valueListenable: _authNotifier,
+        builder: (_, userValue, child) {
+          if (userValue.loading) {
+            return const Center(
+                child: Text(
+              'loading...',
+              textDirection: TextDirection.ltr,
+            ));
           }
-          return StreamBuilder<bool>(
-              stream: _userLoader.stream,
-              builder: (_, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: Text('loading...', textDirection: TextDirection.ltr));
-                }
-                return MaterialApp.router(
-                  routeInformationParser: BeamerParser(),
-                  routerDelegate: routerDelegate,
-                  debugShowCheckedModeBanner: false,
-                  title: 'Convention.Ninja',
-                  /*darkTheme: ThemeData.from(
-                      colorScheme: ColorScheme.dark(),*//*fromSwatch(
+          return child!;
+        },
+        child: MaterialApp.router(
+          routeInformationParser: BeamerParser(),
+          routerDelegate: routerDelegate,
+          debugShowCheckedModeBanner: false,
+          title: 'Convention.Ninja',
+          /*darkTheme: ThemeData.from(
+                      colorScheme: ColorScheme.dark(),*/ /*fromSwatch(
                           primarySwatch: Colors.deepOrange,
-                          brightness: Brightness.dark),*//*
+                          brightness: Brightness.dark),*/ /*
                       useMaterial3: true),
                   themeMode: ThemeMode.dark,*/
-                );
-              });
-        });
+        ));
   }
 }
