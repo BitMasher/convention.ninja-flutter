@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 
@@ -55,6 +57,11 @@ class _AssetsDataTableState extends State<AssetsDataTable> {
                 )),
                 const TableCell(
                     child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: Text('Location')),
+                    )),
+                const TableCell(
+                    child: Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Center(child: Text('Serial')),
                 )),
@@ -96,6 +103,10 @@ class _AssetsDataTableState extends State<AssetsDataTable> {
           child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: SelectableText(entry.id))),
+      TableCell(
+          child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: entry.roomId.startsWith('manifest:') ? ElevatedButton(onPressed: (){context.beamToNamed('/dashboard/${widget.orgId}/inventory/manifests/${entry.roomId.substring(9)}');}, child: Text('See Manifest')) : SelectableText(entry.roomId))),
       TableCell(
           child: Padding(
               padding: const EdgeInsets.all(8.0),

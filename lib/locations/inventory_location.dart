@@ -1,5 +1,7 @@
 import 'package:beamer/beamer.dart';
 import 'package:convention_ninja/pages/inventory_landing_page.dart';
+import 'package:convention_ninja/pages/inventory_manifest_modify.dart';
+import 'package:convention_ninja/pages/inventory_manifests_page.dart';
 import 'package:convention_ninja/pages/inventory_manufacturers_page.dart';
 import 'package:convention_ninja/pages/inventory_models_page.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,7 @@ class InventoryLocation extends BeamLocation<BeamState> {
         '/dashboard/:orgId/inventory/assets/new',
         '/dashboard/:orgId/inventory/assets/:assetId',
         '/dashboard/:orgId/inventory/manifests',
+        '/dashboard/:orgId/inventory/manifests/:manifestId'
       ];
 
   @override
@@ -83,6 +86,25 @@ class InventoryLocation extends BeamLocation<BeamState> {
             child: InventoryAssetModify(
                 orgId: state.pathParameters['orgId']!,
                 assetId: state.pathParameters['assetId']!))
+      ];
+    } else if (state.uri.path.endsWith('/manifests')) {
+      return [
+        BeamPage(
+            key: ValueKey(
+                'inventory-manifests-${state.pathParameters['orgId']}'),
+            title: 'Manifests',
+            child:
+                InventoryManifestsPage(orgId: state.pathParameters['orgId']!))
+      ];
+    } else if (state.uri.path.contains('/manifests/')) {
+      return [
+        BeamPage(
+            key: ValueKey(
+                'inventory-manifests-${state.pathParameters['manifestId']}-${state.pathParameters['orgId']}'),
+            title: 'Modify Manifest',
+            child: InventoryManifestModify(
+                orgId: state.pathParameters['orgId']!,
+                manifestId: state.pathParameters['manifestId']!))
       ];
     } else {
       return [
