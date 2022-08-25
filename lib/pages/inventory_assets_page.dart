@@ -41,60 +41,62 @@ class _AssetsDataTableState extends State<AssetsDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Asset>>(
-        future: _assets,
-        initialData: const [],
-        builder: (context, snapshot) {
-          return Table(
-            border: TableBorder.symmetric(inside: const BorderSide(width: 1.0)),
-            defaultColumnWidth: const IntrinsicColumnWidth(),
-            children: [
-              TableRow(children: [
-                const TableCell(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text('Id')),
-                )),
-                const TableCell(
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text('Location')),
-                    )),
-                const TableCell(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text('Serial')),
-                )),
-                const TableCell(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text('Model')),
-                )),
-                const TableCell(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text('Manufacturer')),
-                )),
-                const TableCell(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text('Tags')),
-                )),
-                TableCell(
-                    child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  context.beamToNamed(
-                                      "/dashboard/${widget.orgId}/inventory/assets/new");
-                                },
-                                child: const Text("New")))))
-              ]),
-              for (var entry in snapshot.data!) buildDataRow(entry, snapshot)
-            ],
-          );
-        });
+    return SingleChildScrollView(
+      child: FutureBuilder<List<Asset>>(
+          future: _assets,
+          initialData: const [],
+          builder: (context, snapshot) {
+            return Table(
+              border: TableBorder.symmetric(inside: const BorderSide(width: 1.0)),
+              // defaultColumnWidth: const IntrinsicColumnWidth(),
+              children: [
+                TableRow(children: [
+                  const TableCell(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text('Id')),
+                  )),
+                  const TableCell(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Center(child: Text('Location')),
+                      )),
+                  const TableCell(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text('Serial')),
+                  )),
+                  const TableCell(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text('Model')),
+                  )),
+                  const TableCell(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text('Manufacturer')),
+                  )),
+                  const TableCell(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text('Tags')),
+                  )),
+                  TableCell(
+                      child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    context.beamToNamed(
+                                        "/dashboard/${widget.orgId}/inventory/assets/new");
+                                  },
+                                  child: const Text("New")))))
+                ]),
+                for (var entry in snapshot.data!) buildDataRow(entry, snapshot)
+              ],
+            );
+          }),
+    );
   }
 
   TableRow buildDataRow(Asset entry, AsyncSnapshot<List<Asset>> snapshot) {

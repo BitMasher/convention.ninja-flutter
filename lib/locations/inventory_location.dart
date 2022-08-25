@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../pages/inventory_asset_modify.dart';
 import '../pages/inventory_assets_page.dart';
 import '../pages/inventory_categories_page.dart';
+import '../pages/inventory_import_page.dart';
 
 class InventoryLocation extends BeamLocation<BeamState> {
   InventoryLocation(RouteInformation routeInformation)
@@ -24,7 +25,8 @@ class InventoryLocation extends BeamLocation<BeamState> {
         '/dashboard/:orgId/inventory/assets/new',
         '/dashboard/:orgId/inventory/assets/:assetId',
         '/dashboard/:orgId/inventory/manifests',
-        '/dashboard/:orgId/inventory/manifests/:manifestId'
+        '/dashboard/:orgId/inventory/manifests/:manifestId',
+        '/dashboard/:orgId/inventory/import',
       ];
 
   @override
@@ -105,6 +107,13 @@ class InventoryLocation extends BeamLocation<BeamState> {
             child: InventoryManifestModify(
                 orgId: state.pathParameters['orgId']!,
                 manifestId: state.pathParameters['manifestId']!))
+      ];
+    } else if (state.uri.path.endsWith('/import')) {
+      return [
+        BeamPage(
+            key: ValueKey('inventory-import-${state.pathParameters['orgId']}'),
+            title: 'Import Assets',
+            child: InventoryImportPage(orgId: state.pathParameters['orgId']!))
       ];
     } else {
       return [

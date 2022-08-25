@@ -190,7 +190,11 @@ class Asset {
         modelId: json['modelId'],
         serialNumber: json['serialNumber'],
         assetTags: tags,
-        roomId: json['roomId'],
+        roomId: json.containsKey('roomId') &&
+            json['roomId'] != null &&
+            json['roomId']['Valid']
+            ? json['roomId']['String']
+            : '',
         model:
             json.containsKey('model') ? Model.fromJson(json['model']) : null);
   }

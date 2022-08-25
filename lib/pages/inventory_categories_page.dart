@@ -55,31 +55,33 @@ class _CategoriesDataTableState extends State<CategoriesDataTable> {
     if (!_asyncEditValidation) {
       _editCatField.currentState?.validate();
     }
-    return FutureBuilder<List<Category>>(
-        future: _categories,
-        initialData: const [],
-        builder: (context, snapshot) {
-          return Table(
-            border: TableBorder.symmetric(inside: const BorderSide(width: 1.0)),
-            children: [
-              const TableRow(children: [
-                TableCell(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text('Id')),
-                )),
-                TableCell(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text('Name')),
-                )),
-                TableCell(child: Text(''))
-              ]),
-              for (var entry in snapshot.data!) buildDataRow(entry, snapshot),
-              buildNewRow(snapshot)
-            ],
-          );
-        });
+    return SingleChildScrollView(
+      child: FutureBuilder<List<Category>>(
+          future: _categories,
+          initialData: const [],
+          builder: (context, snapshot) {
+            return Table(
+              border: TableBorder.symmetric(inside: const BorderSide(width: 1.0)),
+              children: [
+                const TableRow(children: [
+                  TableCell(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text('Id')),
+                  )),
+                  TableCell(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text('Name')),
+                  )),
+                  TableCell(child: Text(''))
+                ]),
+                for (var entry in snapshot.data!) buildDataRow(entry, snapshot),
+                buildNewRow(snapshot)
+              ],
+            );
+          }),
+    );
   }
 
   TableRow buildNewRow(AsyncSnapshot<List<Category>> snapshot) {

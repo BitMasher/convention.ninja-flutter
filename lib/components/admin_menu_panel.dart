@@ -131,6 +131,25 @@ class AdminMenuPanel extends StatelessWidget {
                       .beamToNamed(
                           '/dashboard/$organizationId/inventory/manifests')),
             ),
+            ListTile(
+              leading: const Padding(
+                padding: EdgeInsets.only(left: 15.0),
+                child: FaIcon(
+                  FontAwesomeIcons.upload,
+                  size: 15,
+                  semanticLabel: 'Import',
+                ),
+              ),
+              minLeadingWidth: 5.0,
+              title: const Text(
+                'Import',
+                semanticsLabel: 'Import',
+              ),
+              onTap: () => Future.delayed(const Duration(milliseconds: 500))
+                  .then((value) => _beamKey.currentState?.routerDelegate
+                  .beamToNamed(
+                  '/dashboard/$organizationId/inventory/import')),
+            ),
           ]),
           isExpanded: true,
           canTapOnHeader: true,

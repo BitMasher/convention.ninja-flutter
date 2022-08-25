@@ -1,6 +1,5 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../services/inventory_service.dart';
 
@@ -82,71 +81,73 @@ class _InventoryManifestModifyState extends State<InventoryManifestModify> {
                         padding: const EdgeInsets.all(8.0),
                         child: Column(children: [
                           if (_manifest?.shipDate == null)
-                          TextFormField(
-                              readOnly: _manifest == null || _manifest?.shipDate != null,
-                              controller: _assetTagsController,
-                              focusNode: _assetTagsFocusNode,
-                              onFieldSubmitted: (val) async {
-                                if (val.isEmpty) {
-                                  _assetTagsFocusNode.requestFocus();
-                                  setState(() {
+                            TextFormField(
+                                readOnly: _manifest == null ||
+                                    _manifest?.shipDate != null,
+                                controller: _assetTagsController,
+                                focusNode: _assetTagsFocusNode,
+                                onFieldSubmitted: (val) async {
+                                  if (val.isEmpty) {
+                                    _assetTagsFocusNode.requestFocus();
+                                    setState(() {
+                                      _error = null;
+                                    });
+                                    return;
+                                  }
+                                  var asset =
+                                      await InventoryService.getAssetByTag(
+                                          widget.orgId, val);
+                                  if (asset == null) {
+                                    _assetTagsFocusNode.requestFocus();
+                                    _assetTagsController.selection =
+                                        TextSelection(
+                                            baseOffset: 0,
+                                            extentOffset: _assetTagsController
+                                                .text.length);
+                                    setState(() {
+                                      _error = "Asset tag not found";
+                                    });
+                                  }
+                                  if (_manifestEntries
+                                      .any((e) => e.assetId == asset!.id)) {
+                                    _assetTagsController.clear();
+                                    _assetTagsFocusNode.requestFocus();
+                                    setState(() {
+                                      _error = null;
+                                    });
+                                    return;
+                                  }
+                                  var entry =
+                                      await InventoryService.addManifestEntry(
+                                          widget.orgId,
+                                          widget.manifestId,
+                                          asset!.id);
+                                  if (entry == null) {
+                                    _assetTagsController.selection =
+                                        TextSelection(
+                                            baseOffset: 0,
+                                            extentOffset: _assetTagsController
+                                                .text.length);
+                                    setState(() {
+                                      _error = "failed to add entry, try again";
+                                    });
+                                    return;
+                                  } else {
                                     _error = null;
-                                  });
-                                  return;
-                                }
-                                var asset =
-                                    await InventoryService.getAssetByTag(
-                                        widget.orgId, val);
-                                if (asset == null) {
+                                    _assetTagsController.clear();
+                                  }
+                                  _manifestEntries =
+                                      await InventoryService.getManifestEntries(
+                                          widget.orgId, widget.manifestId);
                                   _assetTagsFocusNode.requestFocus();
-                                  _assetTagsController.selection =
-                                      TextSelection(
-                                          baseOffset: 0,
-                                          extentOffset:
-                                              _assetTagsController.text.length);
-                                  setState(() {
-                                    _error = "Asset tag not found";
-                                  });
-                                }
-                                if (_manifestEntries
-                                    .any((e) => e.assetId == asset!.id)) {
-                                  _assetTagsController.clear();
-                                  _assetTagsFocusNode.requestFocus();
-                                  setState(() {
-                                    _error = null;
-                                  });
-                                  return;
-                                }
-                                var entry =
-                                    await InventoryService.addManifestEntry(
-                                        widget.orgId,
-                                        widget.manifestId,
-                                        asset!.id);
-                                if (entry == null) {
-                                  _assetTagsController.selection =
-                                      TextSelection(
-                                          baseOffset: 0,
-                                          extentOffset:
-                                              _assetTagsController.text.length);
-                                  setState(() {
-                                    _error = "failed to add entry, try again";
-                                  });
-                                  return;
-                                } else {
-                                  _error = null;
-                                  _assetTagsController.clear();
-                                }
-                                _manifestEntries =
-                                    await InventoryService.getManifestEntries(
-                                        widget.orgId, widget.manifestId);
-                                _assetTagsFocusNode.requestFocus();
-                                setState(() {});
-                              },
-                              autocorrect: false,
-                              decoration:
-                                  const InputDecoration(hintText: 'Asset Tag')),
+                                  setState(() {});
+                                },
+                                autocorrect: false,
+                                decoration: const InputDecoration(
+                                    hintText: 'Asset Tag')),
                           TextFormField(
-                            readOnly: _manifest == null || _manifest?.shipDate != null,
+                            readOnly: _manifest == null ||
+                                _manifest?.shipDate != null,
                             controller: _locationController,
                             decoration:
                                 const InputDecoration(labelText: 'Location'),
@@ -155,7 +156,8 @@ class _InventoryManifestModifyState extends State<InventoryManifestModify> {
                             },
                           ),
                           TextFormField(
-                            readOnly: _manifest == null || _manifest?.shipDate != null,
+                            readOnly: _manifest == null ||
+                                _manifest?.shipDate != null,
                             controller: _partyController,
                             decoration: const InputDecoration(
                                 labelText: 'Responsible Party'),
@@ -164,7 +166,8 @@ class _InventoryManifestModifyState extends State<InventoryManifestModify> {
                             },
                           ),
                           TextFormField(
-                            readOnly: _manifest == null || _manifest?.shipDate != null,
+                            readOnly: _manifest == null ||
+                                _manifest?.shipDate != null,
                             controller: _extraController,
                             decoration:
                                 const InputDecoration(labelText: 'Extra'),
@@ -305,7 +308,8 @@ class _InventoryManifestModifyState extends State<InventoryManifestModify> {
                               setState(() {});
                             },
                             child: const Text('Delete'))),
-                  if (_manifest == null || _manifest?.shipDate != null) const TableCell(child: Text(''))
+                  if (_manifest == null || _manifest?.shipDate != null)
+                    const TableCell(child: Text(''))
                 ])
             ])),
       )
