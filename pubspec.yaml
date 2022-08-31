@@ -38,8 +38,18 @@ dependencies:
   firebase_core: ^1.16.0
   font_awesome_flutter: ^10.1.0
   http: ^0.13.4
-  beamer: ^1.4.1+1
   file_picker: ^5.0.1
+  flutter_bloc: ^8.1.1
+  authentication_repository:
+    path: packages/authentication_repository
+  cache:
+    path: packages/cache
+  inventory_repository:
+    path: packages/inventory_repository
+  organization_repository:
+    path: packages/organization_repository
+  equatable: ^2.0.3
+  go_router: ^4.3.0
 
 dev_dependencies:
   flutter_test:

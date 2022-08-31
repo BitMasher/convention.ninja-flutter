@@ -1,0 +1,17 @@
+name: organization_repository
+description: Dart package which manages the organization domain.
+publish_to: none
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  equatable: ^2.0.0
+  json_annotation: ^4.6.0
+  uuid: ^3.0.0
+  cache:
+    path: ../cache
+  authentication_repository:
+    path: ../authentication_repository
+  http: ^0.13.4
+dev_dependencies: {build_runner: ^2.2.0, json_serializable: ^6.3.1}
