@@ -29,5 +29,10 @@ class Asset extends Equatable {
   @override
   List<Object> get props => [id, organizationId, modelId, serialNumber, roomId, assetTags];
 
+  @override
+  String toString() {
+    return '$id\n$roomId\n${model?.toString()}\n${assetTags.map((t)=>t.tagId).join(',')}';
+  }
+
   static String _nullString(Map<String, dynamic> json) => json['Valid'] ? json['String'] : '';
 }

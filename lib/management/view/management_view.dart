@@ -24,12 +24,15 @@ class ManagementView extends StatelessWidget {
           selectionKey: _selectionKey,
         ),
         Expanded(
-            child: Column(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Flexible(child: _child),
+              SingleChildScrollView(child: _child),
           ],
-        )),
+        ),
+            )),
       ],
     );
   }

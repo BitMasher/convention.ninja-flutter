@@ -53,29 +53,27 @@ class _ManifestFormCard extends StatelessWidget {
             buildWhen: (previous, current) => false,
             builder: (ctx, state) {
               context.read<ManifestRepository>().getManifestEntries(_organizationId, state.manifest.id).then((value) => _source._update(value));
-              return SingleChildScrollView(
-                child: Column(children: [
-                  Align(
-                      alignment: Alignment.topCenter,
-                      child: Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
-                          child: SizedBox(
-                              width: 300,
-                              height: 315,
-                              child: _ManifestForm(
-                                  state: state, source: _source)))),
-                  Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
-                      child:
-                          PaginatedDataTable(source: _source, columns: const [
-                        DataColumn(label: Text('Category')),
-                        DataColumn(label: Text('Model')),
-                        DataColumn(label: Text('Manufacturer')),
-                        DataColumn(label: Text('Tags')),
-                        DataColumn(label: Text(''))
-                      ]))
-                ]),
-              );
+              return Column(children: [
+                Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
+                        child: SizedBox(
+                            width: 300,
+                            height: 315,
+                            child: _ManifestForm(
+                                state: state, source: _source)))),
+                Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
+                    child:
+                        PaginatedDataTable(source: _source, columns: const [
+                      DataColumn(label: Text('Category')),
+                      DataColumn(label: Text('Model')),
+                      DataColumn(label: Text('Manufacturer')),
+                      DataColumn(label: Text('Tags')),
+                      DataColumn(label: Text(''))
+                    ]))
+              ]);
             }));
   }
 }
