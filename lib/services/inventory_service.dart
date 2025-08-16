@@ -310,7 +310,7 @@ class InventoryService {
   static Future<List<Category>> getCategories(String orgId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/categories'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/categories'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -331,7 +331,7 @@ class InventoryService {
   static Future<Category?> createCategory(String orgId, String name) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/categories'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/categories'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -348,7 +348,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.put(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/categories/$categoryId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/categories/$categoryId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -364,7 +364,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.delete(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/categories/$categoryId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/categories/$categoryId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -375,7 +375,7 @@ class InventoryService {
   static Future<List<Manufacturer>> getManufacturers(String orgId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/manufacturers'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/manufacturers'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -397,7 +397,7 @@ class InventoryService {
       String orgId, String name) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/manufacturers'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/manufacturers'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -414,7 +414,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.put(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manufacturers/$manufacturerId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manufacturers/$manufacturerId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -431,7 +431,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.delete(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manufacturers/$manufacturerId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manufacturers/$manufacturerId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -442,7 +442,7 @@ class InventoryService {
   static Future<List<Model>> getModels(String orgId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/models'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/models'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -464,7 +464,7 @@ class InventoryService {
       String categoryId, String manufacturerId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/models'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/models'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -498,7 +498,7 @@ class InventoryService {
     }
     final response = await http.patch(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/models/$modelId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/models/$modelId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -514,7 +514,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.delete(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/models/$modelId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/models/$modelId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -526,7 +526,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/assets/barcode/$tagId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/assets/barcode/$tagId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -541,7 +541,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/assets/$assetId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/assets/$assetId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -555,7 +555,7 @@ class InventoryService {
   static Future<List<Asset>> getAssets(String orgId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/assets'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/assets'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -577,7 +577,7 @@ class InventoryService {
       String? serialNumber, List<String> tags) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/assets'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/assets'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -611,7 +611,7 @@ class InventoryService {
     }
     final response = await http.patch(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/assets/$assetId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/assets/$assetId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -628,7 +628,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/assets/$assetId/barcodes'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/assets/$assetId/barcodes'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -645,7 +645,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.delete(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/assets/$assetId/barcodes/$barcodeId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/assets/$assetId/barcodes/$barcodeId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -657,7 +657,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.delete(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/assets/$assetId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/assets/$assetId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -668,7 +668,7 @@ class InventoryService {
   static Future<List<Manifest>> getManifests(String orgId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/manifests'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/manifests'),
         headers: {
           'Authorization': 'Bearer $token',
         });
@@ -688,7 +688,7 @@ class InventoryService {
   static Future<Manifest?> createManifest(String orgId) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
-        Uri.parse('//convention.ninja/api/orgs/$orgId/inventory/manifests'),
+        Uri.parse('//api.convention.ninja/api/orgs/$orgId/inventory/manifests'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -704,7 +704,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.put(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -726,7 +726,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.delete(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId'),
         headers: {
           'Authorization': 'Bearer $token',
         });
@@ -737,7 +737,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId'),
         headers: {
           'Authorization': 'Bearer $token',
         });
@@ -752,7 +752,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.get(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/entries'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/entries'),
         headers: {
           'Authorization': 'Bearer $token',
         });
@@ -774,7 +774,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/entries'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/entries'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -791,7 +791,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.delete(
         Uri.parse(
-            '//convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/entries/$entryId'),
+            '//api.convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/entries/$entryId'),
         headers: {
           'Authorization': 'Bearer $token',
         });
@@ -802,7 +802,7 @@ class InventoryService {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
       Uri.parse(
-        '//convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/ship'
+        '//api.convention.ninja/api/orgs/$orgId/inventory/manifests/$manifestId/ship'
       ),
       headers: {
         'Authorization': 'Bearer $token',

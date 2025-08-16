@@ -39,7 +39,7 @@ class OrganizationService {
   static Future<Organization?> create(String name) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
-        Uri.parse('//convention.ninja/api/orgs'), headers: {
+        Uri.parse('//api.convention.ninja/api/orgs'), headers: {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     }, body: jsonEncode(<String, String>{
@@ -54,7 +54,7 @@ class OrganizationService {
   static Future<Organization?> get(String id) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response =
-    await http.get(Uri.parse('//convention.ninja/api/orgs/$id'), headers: {
+    await http.get(Uri.parse('//api.convention.ninja/api/orgs/$id'), headers: {
       'Authorization': 'Bearer $token',
     });
 
@@ -70,7 +70,7 @@ class OrganizationService {
     }
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response =
-    await http.get(Uri.parse('//convention.ninja/api/orgs'), headers: {
+    await http.get(Uri.parse('//api.convention.ninja/api/orgs'), headers: {
       'Authorization': 'Bearer $token',
     });
     if (response.statusCode >= 200 && response.statusCode < 300) {

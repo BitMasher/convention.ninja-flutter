@@ -48,7 +48,7 @@ class UserService {
       return null;
     }
     final response = await http.get(
-        Uri.parse('//convention.ninja/api/users/me'), headers: {
+        Uri.parse('//api.convention.ninja/api/users/me'), headers: {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     });
@@ -63,7 +63,7 @@ class UserService {
   static Future<User?> onboard(String name, String email, String? displayName) async {
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
     final response = await http.post(
-        Uri.parse('//convention.ninja/api/users'), headers: {
+        Uri.parse('//api.convention.ninja/api/users'), headers: {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     }, body: jsonEncode(<String, String>{
